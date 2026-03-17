@@ -2,16 +2,16 @@
 
 This is the code/data repository for the following report:
 
-Potts, Christopher and Moritz Sudhof. 2026. Invisible failures in human--AI interactions. Ms., Bigspin and Stanford.
+Potts, Christopher and Moritz Sudhof. 2026. [Invisible failures in human--AI interactions](https://arxiv.org/abs/2603.15423). Ms., Bigspin and Stanford.
 
 BiBTeX:
 
 ```
 @unpublished{potts2026invisible,
 	author = {Potts, Christopher and Sudhof, Moritz},
-	note = {arXiv},
-	title = {Invisible {F}ailures in {H}uman--{AI} {I}nteractions},
-	url = {https://arxiv.org/},
+	note = {arXiv:2603.15423},
+	title = {Invisible Failures in Human--{AI} Interactions},
+	url = {https://arxiv.org/abs/2603.15423},
 	year = {2026}}
 ```
 
