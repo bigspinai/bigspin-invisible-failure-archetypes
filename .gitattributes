@@ -1,2 +1,16 @@
 .gz filter=lfs diff=lfs merge=lfs -text
 *.gz filter=lfs diff=lfs merge=lfs -text
+data/interannotator/score_10k_quality_B_opus.jsonl.gz filter=lfs diff=lfs merge=lfs -text
+data/interannotator/score_10k_quality_C_opus.jsonl.gz filter=lfs diff=lfs merge=lfs -text
+data/interannotator/score_10k_quality_C_sonnet.jsonl.gz filter=lfs diff=lfs merge=lfs -text
+data/persist/persist2_sonnet_quality_C_opus.jsonl.gz filter=lfs diff=lfs merge=lfs -text
+data/interannotator/score_10k_gpt5_calibrated_transcripts.jsonl.gz filter=lfs diff=lfs merge=lfs -text
+data/interannotator/score_10k_opus_calibrated_transcripts.jsonl.gz filter=lfs diff=lfs merge=lfs -text
+data/interannotator/score_10k_quality_B_sonnet.jsonl.gz filter=lfs diff=lfs merge=lfs -text
+data/persist/persist2_opus_quality_C_opus.jsonl.gz filter=lfs diff=lfs merge=lfs -text
+data/interannotator/score_10k_quality_A_gpt5.jsonl.gz filter=lfs diff=lfs merge=lfs -text
+data/interannotator/score_10k_quality_A_opus.jsonl.gz filter=lfs diff=lfs merge=lfs -text
+data/interannotator/score_10k_quality_B_gpt5.jsonl.gz filter=lfs diff=lfs merge=lfs -text
+data/interannotator/score_10k_quality_C_gpt5.jsonl.gz filter=lfs diff=lfs merge=lfs -text
+data/persist/persist2_gpt41_quality_C_opus.jsonl.gz filter=lfs diff=lfs merge=lfs -text
+data/persist/persist2_gpt5_quality_C_opus.jsonl.gz filter=lfs diff=lfs merge=lfs -text
