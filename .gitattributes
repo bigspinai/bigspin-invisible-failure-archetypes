@@ -14,3 +14,5 @@ data/interannotator/score_10k_quality_B_gpt5.jsonl.gz filter=lfs diff=lfs merge=
 data/interannotator/score_10k_quality_C_gpt5.jsonl.gz filter=lfs diff=lfs merge=lfs -text
 data/persist/persist2_gpt41_quality_C_opus.jsonl.gz filter=lfs diff=lfs merge=lfs -text
 data/persist/persist2_gpt5_quality_C_opus.jsonl.gz filter=lfs diff=lfs merge=lfs -text
+data/wildchat4M_4o_annotations_opus_v2.json.gz filter=lfs diff=lfs merge=lfs -text
+data/wildchat_annotations_opus_v2.json.gz filter=lfs diff=lfs merge=lfs -text
