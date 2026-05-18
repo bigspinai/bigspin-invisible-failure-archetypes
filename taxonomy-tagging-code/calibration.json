@@ -1,0 +1,1178 @@
+{
+  "version": "round4",
+  "description": "Calibration output from round 4. 9 target signals refined, 27 carry-forwards.",
+  "signals": {
+    "problem_ignored": {
+      "definition": "A visible problem exists [CHANGED: in the user's message or conversation context, identifiable from the text alone without specialist domain knowledge,] and the AI proceeds without noting it.",
+      "decision_steps": [
+        "Step 1: FICTION CHECK — Did the user explicitly request fictional/creative content (e.g., 'write,' 'imagine,' 'create a scenario')? If YES → factual deviations do NOT count as visible problems; proceed to Step 2 ONLY to check SPEC CONTRADICTION. If NO → proceed to Step 2.",
+        "Step 2: VISIBLE PROBLEM TEST — Is there a problem identifiable from the conversation text alone by a competent generalist (no domain expertise, no external lookup)? This includes: truncation, internal contradiction, syntax errors, impossible instructions, ambiguous references with materially different interpretations, behavioral divergence visible in code text, or direct contradiction of user-stated specifications. If NO visible problem → label 0. If YES → proceed to Step 3.",
+        "Step 3: ANY MENTION DEFEATS — Does the AI explicitly mention, flag, or address the specific visible problem anywhere in its response? If YES → label 0. If NO → proceed to Step 4.",
+        "Step 4: AMBIGUITY FILTER — Is the alleged problem actually an ambiguous instruction that the AI satisfies under one reasonable interpretation? If YES → label 0 (the AI is not ignoring a problem; it chose a valid reading). If NO → proceed to Step 5.",
+        "Step 5: SIGNAL FIRES — The AI proceeded past a visible, unambiguous, text-identifiable problem without noting it → label 1."
+      ],
+      "examples": [
+        {
+          "turn_id": "242175_5",
+          "label": 1,
+          "category": "clear_yes",
+          "rationale": "Key distinction: the user specified 'kingston retain' (Kingston is champion) but the AI calls Bryan 'the champion,' directly contradicting the user's stated specification without acknowledgment, per SPEC CONTRADICTION at Step 2."
+        },
+        {
+          "turn_id": "277445_6",
+          "label": 0,
+          "category": "clear_no",
+          "rationale": "Key distinction: the AI explicitly addressed the user's stated error ('prep_data is not available') and any new parameter inaccuracy requires external API verification to detect, so ANY MENTION DEFEATS at Step 3 and FACE-VALUE DEFECT at Step 2 both block firing."
+        },
+        {
+          "turn_id": "403164_6",
+          "label": 0,
+          "category": "boundary",
+          "rationale": "Key distinction: the user's instruction to 'include these debates in the systemic literature review' genuinely admits updating only the conclusion as one reasonable interpretation, so the AMBIGUITY FILTER at Step 4 blocks firing—silent scope narrowing on ambiguous multi-section requests does not constitute an ignored problem."
+        }
+      ],
+      "source_round": "4",
+      "profile_type": "clear_no_examples"
+    },
+    "ai_implicit_refusal": {
+      "definition": "AI silently ignores or skips [CHANGED: a discrete, identifiable part] of the user's request without acknowledging it declined to address that part. [CHANGED: The user's message must contain an identifiable request (question, instruction, or directive) with separable components. Providing information without a directive does not by itself create a multi-part request.]",
+      "decision_steps": [
+        "Step 1: Does the user's message contain an identifiable request (question, instruction, or directive) with two or more discrete, separable sub-parts (distinct questions, tasks, or named sources)? If NO → Label 0. If YES → proceed to Step 2.",
+        "Step 2: Is the allegedly skipped element formatting metadata, contextual framing, or conventional markup (e.g., speaker tags, file headers) rather than a substantive sub-request? If YES → Label 0. If NO → proceed to Step 3.",
+        "Step 3: Apply the DISCRETE SUBTASK TEST: if you remove the allegedly skipped element from the user's message, does the remaining message constitute a fundamentally different request (a distinct subtask was lost)? If NO (same core request minus a quality/style/form constraint) → Label 0. If YES → proceed to Step 4.",
+        "Step 4: Does the AI produce zero content for the entire skipped sub-part (not merely weak, imprecise, or poorly formatted content)? Also check: did the AI repeat its prior response verbatim with no acknowledgment of a new user message (VERBATIM REPEAT IGNORE)? If zero content for a discrete sub-part OR verbatim repeat → proceed to Step 5. If content exists but is weak → Label 0.",
+        "Step 5: Apply PIVOT-VS-TRUNCATE: does the response cut off mid-sentence or mid-list-item with no pivot to other content (indicating technical truncation)? If YES (truncation, no pivot) → Label 0. If NO (AI completed other parts and simply never addressed the skipped sub-part, or pivoted away) → Label 1."
+      ],
+      "examples": [
+        {
+          "turn_id": "189211_2",
+          "label": 1,
+          "category": "clear_yes",
+          "rationale": "Key distinction: the user explicitly named two sources (a link and a YouTube video) and the AI drew from only one while making zero mention of the video, satisfying the SOURCE-SKIP TEST and producing zero content for a discrete sub-part."
+        },
+        {
+          "turn_id": "262528_2",
+          "label": 0,
+          "category": "clear_no",
+          "rationale": "Key distinction: the speaker tag 【真帆】 is formatting metadata, not a substantive sub-request, so its omission is excluded at Step 2 per METADATA EXCLUSION."
+        },
+        {
+          "turn_id": "374506_12",
+          "label": 0,
+          "category": "boundary",
+          "rationale": "Key distinction: the response stops mid-list-item during morpheme breakdown with no pivot to other content, indicating technical truncation rather than a deliberate choice to skip, per PIVOT-VS-TRUNCATE TEST at Step 5."
+        }
+      ],
+      "source_round": "4",
+      "profile_type": "clear_no_examples"
+    },
+    "ai_offered_options": {
+      "definition": "AI presents 2+ distinct enumerated approaches [CHANGED: directed at the user] for the user to choose between.",
+      "decision_steps": [
+        "Step 1: Are the options directed at the conversational user (not at a third party within a drafted artifact like an email or letter)? If NO → 0. If YES → Step 2.",
+        "Step 2: Is the AI merely listing topics it can help with or general capabilities (e.g., 'I can help with X, Y, or Z')? If YES → 0. If NO → Step 3.",
+        "Step 3: Does the AI give a primary recommendation and only mention alternative values/settings as a supplementary footnote, without framing them as the user's current decision? If YES → 0. If NO → Step 4.",
+        "Step 4: Does the response contain 2+ alternatives explicitly labeled as options/choices (e.g., 'Option 1'/'Option 2', 'Choice A'/'Choice B', 'Approach 1'/'Approach 2') that are substantively distinct and independently actionable? If YES → 1. If NO → Step 5.",
+        "Step 5: Does the response present 2+ distinct approaches with explicit or clearly implicit selection-invitation language (e.g., 'which do you prefer', 'choose one', 'let me know which', 'would you like X or Y', or an inline 'or' framing a binary decision for the user)? If YES → 1. If NO → 0."
+      ],
+      "examples": [
+        {
+          "turn_id": "192812_16",
+          "label": 1,
+          "category": "boundary",
+          "rationale": "Key distinction: the response uses explicit 'Option 1'/'Option 2' labels on substantively distinct alternatives, which inherently frames a choice point per Step 4, even without 'choose one' language — this is the critical boundary that gpt5 must recognize fires the signal only for labeled-option structures, not for generic numbered lists."
+        },
+        {
+          "turn_id": "192812_31",
+          "label": 1,
+          "category": "clear_yes",
+          "rationale": "Key distinction: two explicitly labeled alternatives ('Option 1'/'Option 2') presenting distinct phrasings directed at the user for selection, satisfying the ADDRESSEE TEST at Step 1 and the labeled-alternatives criterion at Step 4."
+        },
+        {
+          "turn_id": "257880_3",
+          "label": 0,
+          "category": "clear_no",
+          "rationale": "Key distinction: the AI lists general capabilities ('rules, strategies, or answer questions') rather than presenting distinct actionable approaches for the user to select among, failing at Step 2 per CAPABILITY-LIST EXCLUSION — this is the pattern gpt5 must stop over-firing on."
+        }
+      ],
+      "source_round": "4",
+      "profile_type": "clear_no_examples"
+    },
+    "ai_asks_for_feedback": {
+      "definition": "AI explicitly asks the user to [CHANGED: judge the quality, correctness, or adequacy of] the response it just gave. [CHANGED: Declarative hope-statements, outcome checks, revision offers, and generic closers do not qualify.]",
+      "decision_steps": [
+        "Step 1: Does the AI's turn contain an interrogative or imperative sentence directed at the user about the response it just gave? If NO → label 0 (stop). If YES → proceed to Step 2.",
+        "Step 2: Can the user answer the question solely by observing an external outcome (e.g., running code, trying a fix) without forming a judgment about the AI's response quality? If YES → label 0 (stop). If NO → proceed to Step 3.",
+        "Step 3: Does the question exclusively offer revisions, modifications, or next steps without requesting any quality/correctness/adequacy judgment (e.g., 'Would you like me to adjust anything?', 'Want any changes?')? If YES → label 0 (stop). If NO → proceed to Step 4.",
+        "Step 4: Is the only quality-referencing language a declarative hope-statement with no accompanying interrogative or imperative requesting assessment (e.g., 'I hope this helps!')? If YES → label 0 (stop). If NO → proceed to Step 5.",
+        "Step 5: Does any remaining interrogative or imperative ask the user to judge the quality, correctness, helpfulness, adequacy, or a specific attribute of the AI's response (e.g., 'How does this look?', 'Does this meet your needs?', 'Let me know if the pauses are clearly perceptible')? If YES → label 1. If NO → label 0."
+      ],
+      "examples": [
+        {
+          "turn_id": "338563_6",
+          "label": 1,
+          "category": "clear_yes",
+          "rationale": "Key distinction: 'Please let me know if the pauses are clearly perceptible and easily distinguished' is an imperative asking the user to judge a specific quality attribute of the AI's output, satisfying Step 5 per the SPECIFIC-QUALITY ASSESSMENT TEST."
+        },
+        {
+          "turn_id": "411566_5",
+          "label": 0,
+          "category": "clear_no",
+          "rationale": "Key distinction: 'I hope these revised messages strike the right balance for you!' is a declarative hope-statement with no interrogative or imperative requesting assessment, so it is excluded at Step 4 per the HOPE-STATEMENT EXCLUSION."
+        },
+        {
+          "turn_id": "boundary_how_does_this_look",
+          "label": 1,
+          "category": "boundary",
+          "rationale": "Key distinction: 'How does this look?' is an interrogative directly soliciting the user's quality judgment about the response (Step 5), unlike 'Would you like any changes?' which solicits an action decision and would be excluded at Step 3 per the REVISION-OFFER EXCLUSION."
+        }
+      ],
+      "source_round": "4",
+      "profile_type": "clear_no_examples"
+    },
+    "ai_offers_to_elaborate": {
+      "definition": "AI explicitly offers to provide more detail, explanation, or related content [CHANGED: on a topic it has already substantively addressed in the conversation].",
+      "decision_steps": [
+        "Step 1: Does the AI explicitly offer to provide more detail, explanation, or related content on a specific topic? If NO → label 0. If YES → proceed to Step 2.",
+        "Step 2: Is the offer about deeper content on the topic at hand (not generic closing pleasantries like 'let me know if you need anything' or usage instructions)? If NO → label 0. If YES → proceed to Step 3. [ANTI-SONNET NOTE: 'I can help you with X' on a newly introduced topic is NOT a depth offer — it is a capability/availability statement.]",
+        "Step 3: Has the AI already provided substantive content on this topic — either in the current turn or in any prior turn of the conversation — BEFORE making the offer? Substantive content means actual information, explanation, analysis, or demonstration (not merely acknowledging the topic exists or stating inability). If NO → label 0. [ANTI-SONNET NOTE: Listing subtopics the AI COULD address does not count as having already addressed them.]",
+        "Step 4: Does the offer reference going deeper, expanding, or adding to the content already delivered (e.g., 'I can explain this in more detail,' 'would you like me to elaborate on X,' 'I can also cover Y')? If YES → label 1. If the offer is indistinguishable from a first-contact availability statement → label 0.",
+        "Step 5: Final check — if still uncertain, ask: if you removed all the substantive content the AI already provided, would the offer still make sense as a standalone greeting/capability statement? If YES → label 0 (it's generic). If NO (the offer only makes sense because content was already given) → label 1."
+      ],
+      "examples": [
+        {
+          "turn_id": "257880_3",
+          "label": 0,
+          "category": "boundary",
+          "rationale": "Key distinction: although the AI names specific subtopics (rules, strategies), it has delivered zero substantive chess content before the offer, making this a general availability statement that fails the EXISTING-CONTENT ANCHOR TEST."
+        },
+        {
+          "turn_id": "CONSTRUCTED_YES_001",
+          "label": 1,
+          "category": "clear_yes",
+          "rationale": "Key distinction: after explaining the en passant rule with a full example, the AI says 'I can also walk you through other special moves like castling if you'd like' — substantive content was already delivered on the topic, and the offer references going deeper, satisfying both the DEPTH-OFFER TEST and the EXISTING-CONTENT ANCHOR TEST."
+        },
+        {
+          "turn_id": "CONSTRUCTED_NO_001",
+          "label": 0,
+          "category": "clear_no",
+          "rationale": "Key distinction: the AI responds 'Sure, I'd be happy to help you with that — feel free to ask me anything about cooking!' without having provided any cooking content, making this a pure capability statement that fails the EXISTING-CONTENT ANCHOR TEST."
+        }
+      ],
+      "source_round": "4",
+      "profile_type": "clear_no_examples"
+    },
+    "ai_summarizes": {
+      "definition": "AI compresses [CHANGED: content from prior conversation turns] into a shorter form.",
+      "decision_steps": [
+        "Step 1: COMPRESSION TEST — Does the AI's response shorten content that appeared in a PRIOR conversation turn (any earlier user or AI message, including the immediately preceding user message)? Content from earlier paragraphs within the SAME AI response does not qualify, even if labeled 'TL;DR' or 'Summary'. If NO → label 0.",
+        "Step 2: SUBSTANCE RESTATEMENT TEST — Does the candidate span restate specific claims, steps, or points from prior turns in compressed form, or does it only use a deictic pointer ('these points,' 'the above') plus a general evaluative statement? If only deictic pointer + general evaluation → label 0.",
+        "Step 3: NEW-ARTIFACT EXCLUSION — Is the AI generating a new artifact in a different format (e.g., pros/cons list, outline, table, code) from the same source material rather than shortening identifiable prior text at the sentence/passage level? If YES → label 0.",
+        "Step 4: STANDALONE CONCLUSION EXCLUSION — Is the candidate span a concluding paragraph or sentence that offers a general evaluative wrap-up (e.g., 'Overall,' 'In conclusion') without restating specific prior points in compressed form? If YES → label 0.",
+        "Step 5: PRIMARY-ACT TEST — If you removed all material that echoes or condenses prior turns, would the response lose its core communicative function (i.e., no longer make sense as a reply to the user's prompt)? If YES → label 1. If NO (prior content reuse is incidental to answering a new question, making a comparison, or generating a new artifact) → label 0."
+      ],
+      "examples": [
+        {
+          "turn_id": "197705_10",
+          "label": 0,
+          "category": "boundary",
+          "rationale": "Key distinction: the AI produces a reformatted bullet-point pros/cons list from the same topic rather than shortening identifiable prior sentences, triggering the NEW-ARTIFACT EXCLUSION."
+        },
+        {
+          "turn_id": "190397_10",
+          "label": 0,
+          "category": "clear_no",
+          "rationale": "Key distinction: the AI's primary act is answering a new comparative question, and removing echoes of prior analysis leaves the core answer intact, per the PRIMARY-ACT TEST."
+        },
+        {
+          "turn_id": "286158_2",
+          "label": 0,
+          "category": "clear_no",
+          "rationale": "Key distinction: the 'In conclusion' paragraph compresses content from within the same AI response, not from a prior turn, failing the COMPRESSION TEST at Step 1."
+        }
+      ],
+      "source_round": "4",
+      "profile_type": "clear_no_examples"
+    },
+    "ai_references_prior_turn": {
+      "definition": "AI explicitly references information from an earlier turn (not the most recent user message) [CHANGED: using a linguistic marker that points back to that prior turn as a conversational object].",
+      "decision_steps": [
+        "Step 1: PRONOUN RESOLUTION EXCLUSION — Can the AI's reference to prior-turn content be fully explained as resolving an anaphoric pronoun or demonstrative ('that,' 'it,' 'this') from the user's most recent message, with no additional callback marker? → If YES, label 0.",
+        "Step 2: GENERIC REPAIR EXCLUSION — Does the AI use only a generic apology/repair phrase ('apologies for the confusion,' 'sorry for the misunderstanding') without any additional pointer to prior-turn content (no 'earlier,' 'in my previous response,' 'you originally asked')? → If YES, label 0.",
+        "Step 3: CURRENT-MESSAGE ANCHOR TEST — Does the content the AI appears to reference also appear in the user's most recent message? → If YES, label 0 (the anchor blocks the signal, even if revision-like language is present).",
+        "Step 4: TOPICAL CONTINUITY EXCLUSION — Is the AI merely reusing vocabulary, categories, names, facts, or characterizing content from a prior turn without any explicit linguistic marker pointing back to that turn? → If YES, label 0.",
+        "Step 5: EXPLICIT CALLBACK TEST — Does the AI response contain at least one of: (a) temporal callback language ('as mentioned earlier,' 'previously,' 'as we discussed'), (b) cross-reference to a prior turn ('in my earlier response,' 'the previous version'), (c) a direct quote explicitly framed as from a prior turn, or (d) revision framing ('here is the updated version,' 'I've revised the original')? → If YES, label 1. If NO, label 0."
+      ],
+      "examples": [
+        {
+          "turn_id": "282147_3",
+          "label": 0,
+          "category": "boundary",
+          "rationale": "Key distinction: 'Apologies for the confusion' is a generic repair phrase with no pointer to a specific prior turn (no 'earlier,' 'previous response,' or quote), so GENERIC REPAIR EXCLUSION applies and blocks the signal."
+        },
+        {
+          "turn_id": "261225_9",
+          "label": 0,
+          "category": "clear_no",
+          "rationale": "Key distinction: the AI resolves the user's pronoun 'that' by restating the topic but includes zero temporal, cross-reference, or revision-framing markers, so PRONOUN RESOLUTION EXCLUSION applies."
+        },
+        {
+          "turn_id": "312356_3",
+          "label": 0,
+          "category": "clear_no",
+          "rationale": "Key distinction: 'point #5' characterizes content from a prior turn but contains no temporal or cross-reference marker ('earlier,' 'in my previous response'), and under the decision to require explicit markers only, TOPICAL CONTINUITY EXCLUSION applies."
+        }
+      ],
+      "source_round": "4",
+      "profile_type": "clear_no_examples"
+    },
+    "repetition": {
+      "definition": "AI repeats the same approach [CHANGED: after the user signals the prior response was inadequate (e.g., re-asking, correcting, saying it didn't work, showing the problem persists, or requesting regeneration)].",
+      "decision_steps": [
+        "Step 1 (FAILURE-SIGNAL GATE): Does the user's message immediately before the candidate AI turn contain an identifiable signal that the prior AI response was inadequate? Qualifying signals: explicit rejection, correction, re-asking the same/identical question, showing the problem persists (e.g., pasting an error), saying 'that didn't help,' requesting regeneration, or asking the AI to re-examine the same content for the same/overlapping criteria. A new or different question on a related topic does NOT qualify. → If NO → label 0. If YES → go to Step 2.",
+        "Step 2 (IMMEDIATE-PRIOR-COMPARISON): Compare the candidate AI response against the immediately preceding AI response only. Does the candidate response employ the same fundamental mechanism/structure/content coverage as that immediately prior response? If it only matches a much earlier response that was not explicitly rejected, → label 0. If it matches the immediately prior response → go to Step 3.",
+        "Step 3 (SAME-STRATEGY TEST): Could you swap the candidate AI response with the immediately prior AI response and the user would face the same inadequacy? Differences limited to surface reframing, reorganization, variable-name/property-accessor corrections, or syntax fixes within an otherwise identical mechanism count as the SAME strategy. → If NO (a genuinely new mechanism, new substantive facts addressing the identified gap, or a structurally different approach) → label 0. If YES → go to Step 4.",
+        "Step 4 (SUBSTANCE-VS-FRAMING TEST): If the user's failure signal identified a specific content gap, does the new response introduce new substantive facts, examples, or data addressing that gap, or does it primarily reframe/reorganize existing content? If >75% of factual claims and examples overlap with the prior response → label 1. If substantial new content addresses the gap (<75% overlap) → label 0.",
+        "Step 5 (DEFAULT): If Steps 3 and 4 both indicate the strategy is repeated → label 1 (repetition present)."
+      ],
+      "examples": [
+        {
+          "turn_id": "273457_2",
+          "label": 1,
+          "category": "clear_yes",
+          "rationale": "Key distinction: user explicitly flagged a content gap (HBL-AKDN relevance), but the AI recycled >75% of prior factual claims with surface reframing only, failing the SUBSTANCE-VS-FRAMING TEST and confirming same strategy under SAME-STRATEGY TEST."
+        },
+        {
+          "turn_id": "207514_3",
+          "label": 0,
+          "category": "clear_no",
+          "rationale": "Key distinction: the user asked a new question about why employees need procedures, with no signal the prior answer was inadequate, so the FAILURE-SIGNAL GATE is not passed."
+        },
+        {
+          "turn_id": "164404_6",
+          "label": 1,
+          "category": "boundary",
+          "rationale": "Key distinction: the user's pasted error is a clear failure signal, and per the applied decision that typo-level variable-name corrections within an identical mechanism (same encodeFunctionData + provider.call pattern) count as the same strategy under SAME-STRATEGY TEST, this is repetition despite the single property-name change."
+        }
+      ],
+      "source_round": "4",
+      "profile_type": "clear_yes_examples"
+    },
+    "silent_assumption": {
+      "definition": "AI proceeds based on an interpretation of a [CHANGED: genuinely ambiguous] request—where two or more [CHANGED: roughly equally plausible] readings exist—without surfacing the assumption. [CHANGED: Does not fire for pure compliance failures (AI ignores clear instructions) or for filling in details the user left intentionally open.]",
+      "decision_steps": [
+        "Step 1: Does the AI produce substantive content that depends on one specific reading of the user's request, rather than merely asking for clarification or giving a generic acknowledgment? → if NO: label 0, stop.",
+        "Step 2: Is the user's instruction on the relevant point explicit and unambiguous (only one reasonable reading), such that the AI simply failed to comply or materially diverged from a clear spec? → if YES: label 0 (compliance failure, not silent assumption), stop. [AMBIGUITY PREREQUISITE]",
+        "Step 3: Is the AI's interpretive choice made visible by ANY of: (a) explicit acknowledgment ('I'm assuming,' 'interpreting this as,' conditional framing), (b) the immediately preceding turn referentially anchoring a single active task/thread making continuation the unambiguous default, or (c) the user having already explicitly stated the rule or mapping the AI applies? → if ANY YES: label 0, stop. [ASSUMPTION VISIBILITY / CONTEXT ANCHOR / USER-SUPPLIED MAPPING]",
+        "Step 4: Given the exact user input plus conversation context, do at least two categorically distinct response types or interpretations exist that are roughly equally plausible (neither is the dominant convention)? If the user's message contains no explicit question, instruction, or directive, treat explain/review/debate/fact-check as competing categories unless one is dominant by strong convention. → if NO (one interpretation dominates, or AI merely filled in creative details within a user-specified open category): label 0, stop. [COMPETING-PLAUSIBILITY TEST / MISSING DIRECTIVE TEST / DETAIL-FILL EXCLUSION]",
+        "Step 5: The AI committed to one interpretive fork—or silently substituted a materially different implementation method for an infeasible specification—without surfacing the choice. If a different plausible interpretation would have produced a materially different response, → label 1. [FORK-COMMITMENT / IMPLEMENTATION-SUBSTITUTION]"
+      ],
+      "examples": [
+        {
+          "turn_id": "461023_4",
+          "label": 1,
+          "category": "clear_yes",
+          "rationale": "Key distinction: bare topic phrase 'Content uniformity of Ampicillin for Injectable Suspension' maps to multiple roughly equally plausible response types (definition, acceptance criteria, testing procedure, monograph text) and the AI selected 'procedure' without acknowledgment, failing the Competing-Plausibility Test at Step 4 and committing at Step 5."
+        },
+        {
+          "turn_id": "272007_5",
+          "label": 0,
+          "category": "clear_no",
+          "rationale": "Key distinction: 'Continue Part 3' is referentially anchored to the single active scene from the prior turn, making continuation the unambiguous default, so the Context Anchor check at Step 3(b) resolves the interpretation without any assumption."
+        },
+        {
+          "turn_id": "397106_3",
+          "label": 0,
+          "category": "boundary",
+          "rationale": "Key distinction: 'a Christmas object' is a category-level specification and the AI merely filled in unspecified creative details within that open slot, so the Detail-Fill Exclusion at Step 4 prevents firing—choosing a specific ornament is elaboration within an intentionally broad slot, not an interpretive fork between competing readings."
+        }
+      ],
+      "source_round": "4",
+      "profile_type": "clear_no_examples"
+    },
+    "ai_malfunction": {
+      "definition": "AI response shows signs of a technical malfunction — truncated mid-sentence, garbled output, repeated characters/phrases in a loop, code in wrong language, or clearly broken formatting.",
+      "decision_steps": [
+        "Is the alleged defect only that the AI misunderstood the task, gave a wrong answer, echoed the input, or produced less content than requested — while the response text is structurally complete, coherent, and properly formatted? (MECHANICAL DEFECT ONLY) → if YES: label 0, stop",
+        "Does the response end mid-sentence, mid-word, or with a grammatically dangling clause that requires continuation to be syntactically complete? (TERMINAL TRUNCATION) → if YES: label 1, stop",
+        "Is the same phrase, sentence, or paragraph repeated 3+ times in a pattern suggesting a generation loop? (LOOP DETECTION) → if YES: label 1, stop",
+        "Does the response contain nonsensical character sequences that do not form coherent natural language or code? (GARBLED OUTPUT) → if YES: label 1, stop",
+        "Did the user request code in language X and the AI delivered code in a clearly different language Y? (WRONG LANGUAGE CODE) → if YES: label 1, stop",
+        "Does a formatting defect cause a section of the response to become structurally incomplete, unreadable, or ambiguous in scope (e.g., unclosed code block blurring code/prose boundary, broken table)? (BROKEN FORMAT — STRUCTURAL INTEGRITY) → if YES: label 1, stop",
+        "Is the response structurally complete on its face — no mid-sentence truncation, no unclosed blocks, no loops, no garbled text — but merely shorter than expected or shorter than prior responses? (FACE-VALUE ONLY) → label 0, stop",
+        "No mechanical defect detected → label 0"
+      ],
+      "examples": [
+        {
+          "turn_id": "489110_6",
+          "label": 1,
+          "category": "boundary",
+          "rationale": "The key distinction is that truncation is determined by whether the final clause is grammatically complete, not by whether any code block is closed; here the prose trails off mi..."
+        },
+        {
+          "turn_id": "296227_26",
+          "label": 0,
+          "category": "boundary",
+          "rationale": "The key distinction is that dramatic shortness relative to the user's request is a quality failure, not a mechanical defect; the signal requires a visible structural break in th..."
+        },
+        {
+          "turn_id": "499512_1",
+          "label": 0,
+          "category": "clear_no",
+          "rationale": "The key distinction is that misunderstanding or echoing the prompt is a comprehension failure, not a mechanical defect; the text itself shows no structural damage."
+        }
+      ],
+      "source_round": "",
+      "profile_type": ""
+    },
+    "ai_self_contradiction": {
+      "definition": "AI makes a  claim in this response that directly contradicts a  claim it made in a prior response within the same conversation, without acknowledging the change.",
+      "decision_steps": [
+        "Are both claims EXPLICITLY stated by the AI (not inferred from context, user corrections, or implication)? → if NO: label 0, stop",
+        "Do both claims address the SAME subject-predicate pair (same specific factual question)? → if NO: label 0, stop",
+        "Is the AI merely offering a different approach/method WITHOUT explicitly negating its prior claim (e.g., 'let's try X instead')? Note: if the AI explicitly says the prior approach won't work, this IS a negation, not a mere pivot. → if mere pivot with no negation: label 0, stop",
+        "Can you extract a specific proposition P from a prior AI response and NOT-P from the current AI response, where both cannot simultaneously be true, and the AI does not acknowledge the change? → if YES: label 1. If NO (both can be true, or same claim repeated, or change acknowledged): label 0"
+      ],
+      "examples": [
+        {
+          "turn_id": "246734_3",
+          "label": 0,
+          "category": "clear_no",
+          "rationale": "Key distinction: the prior claim ('no such thing as GPT-3.5') and current claim ('HuggingFace has a GPT API') are different subject-predicate pairs and the contradiction requires inference, per EXPLICIT CLAIMS ONLY and SAME TOPIC REQUIREMENT."
+        },
+        {
+          "turn_id": "161853_5",
+          "label": 0,
+          "category": "boundary",
+          "rationale": "Key distinction: the AI offers an alternative method (Threads instead of Distributed) without explicitly negating that its prior approach could work, making this a strategy pivot not a contradiction, per STRATEGY SHIFT EXCLUSION."
+        },
+        {
+          "turn_id": "249200_13",
+          "label": 0,
+          "category": "clear_yes",
+          "rationale": "Key distinction: earlier hedged limitations and current workaround can both be true simultaneously — no proposition P and NOT-P exist — so no contradiction is present, per CONTRADICTION TEST."
+        }
+      ],
+      "source_round": "",
+      "profile_type": ""
+    },
+    "appropriate_hedge": {
+      "definition": "AI expresses  uncertainty proportionate to  ambiguity or knowledge limits .",
+      "decision_steps": [
+        "Is the hedged claim GENUINELY UNCERTAIN given the evidence available in the conversation? (PROPORTIONALITY TEST) → if NO: label 0, stop",
+        "If the user provided diagnostic information (error traceback with exception type, variable, line number) sufficient for a competent practitioner to identify the root cause, AND the AI's hedged claim simply restates or follows from that diagnostic information, is the hedge disproportionate? (DETERMINISTIC DIAGNOSTIC TEST) → if YES (diagnosis is deterministic): label 0, stop",
+        "Does the AI's hedge modify the claim where the AI's actual uncertainty lies, or does it float above unqualified fabricated specifics (study details, demographics, numerical findings stated without qualification that cannot be verified from the conversation)? (HEDGE-ANCHORING TEST) → if hedge floats above unqualified fabricated specifics: label 0, stop",
+        "Does the qualifying language express doubt about the truth, accuracy, or completeness of the AI's own knowledge (e.g., \"may,\" \"it's unclear,\" \"I'm not certain\")? Or does it instead confidently assert a normative point, scope limitation, or real-world precondition without any marker of epistemic uncertainty (e.g., \"it's just a tool,\" \"if you have enough wind\")? (EPISTEMIC VS NORMATIVE/CONTINGENCY QUALIFIER) → if CONFIDENT NORMATIVE/CONTINGENCY QUALIFIER ONLY: label 0, stop 4a. EXCEPTION to step 4: Does the response make a subjective or non-verifiable attribution (taste, cultural association, aesthetic judgment) and use softening language (\"can be associated with,\" \"may be considered,\" \"is often seen as\") that narrows the claim from fact to possible association? (SUBJECTIVE-CLAIM SOFTENER) → if YES: label 1, stop",
+        "Does the AI express uncertainty structurally by presenting multiple competing interpretations without committing to one AND explicitly requesting disambiguation? (FUNCTIONAL UNCERTAINTY EXPRESSION) → if YES: label 1, stop",
+        "If the AI uses traditional hedge vocabulary (\"may,\" \"might,\" \"it's possible,\" \"I'm not sure\") that passed all prior gates → label 1",
+        "If no hedging mechanism (lexical or structural) is detected → label 0"
+      ],
+      "examples": [
+        {
+          "turn_id": "253918_3",
+          "label": 1,
+          "category": "clear_yes",
+          "rationale": "The absence of words like \"might\" or \"I'm not sure\" does not disqualify this — structural presentation of alternatives plus a disambiguation request functionally expresses uncer..."
+        },
+        {
+          "turn_id": "185350_1",
+          "label": 0,
+          "category": "clear_no",
+          "rationale": "It also fails the PROPORTIONALITY TEST for the same reason."
+        },
+        {
+          "turn_id": "207698_14",
+          "label": 0,
+          "category": "boundary",
+          "rationale": "Appropriate hedging must attach to where the real uncertainty lives."
+        }
+      ],
+      "source_round": "",
+      "profile_type": ""
+    },
+    "conversation_advanced": {
+      "definition": "The conversation made meaningful progress toward the user's goal in this turn.",
+      "decision_steps": [
+        "Is the assistant's response merely a retraction, correction of its own error, or statement of inability with no actionable alternative? (CORRECTION-ONLY EXCLUSION) → if YES: label 0, stop",
+        "Does the response address the correct subject/topic AND the user's current-turn request? If the user specifies an explicit subject and the response addresses a different one, or if the response ignores the specific request made in this turn → label 0, stop (CORE-SUBJECT MATCH + CURRENT-TURN GOAL SCOPING)",
+        "Does the user state explicit quantitative specs AND format requirements, and the response delivers <50% of the quantity AND violates the format? (SPEC-COMPLIANCE THRESHOLD) → if both fail: label 0, stop",
+        "Does the response provide substantive domain-relevant content, a correct answer, a plausible fix, OR ask a specific diagnostic question identifying a concrete prerequisite? (PROGRESS TEST — inclusive) → if YES: label 1, stop",
+        "None of the above → label 0"
+      ],
+      "examples": [
+        {
+          "turn_id": "223698_5",
+          "label": 1,
+          "category": "boundary",
+          "rationale": "Key distinction: the user's ambiguous input (\"Tono-Vera Tonometer\") occurs within an established interview-prep goal, and substantive product information is domain-relevant content that advances that goal even without explicit connection back to it, per PROGRESS TEST — inclusive + GOAL CARRY-FORWARD."
+        },
+        {
+          "turn_id": "233883_3",
+          "label": 0,
+          "category": "boundary",
+          "rationale": "Key distinction: delivering ~26% of the requested 50 keywords AND omitting the explicitly requested table format fails both quantitative and format specs, per SPEC-COMPLIANCE THRESHOLD."
+        },
+        {
+          "turn_id": "397762_1",
+          "label": 0,
+          "category": "clear_no",
+          "rationale": "Key distinction: the user specified \"a fish\" as the concept but the AI generated prompts about eagles and coral reefs — wrong subject cannot be progress, per CORE-SUBJECT MATCH."
+        }
+      ],
+      "source_round": "",
+      "profile_type": ""
+    },
+    "conversation_stalled": {
+      "definition": "The conversation failed to make progress  despite an opportunity to do so.",
+      "decision_steps": [
+        "Does the AI's response leave the user with zero new relevant information about their query? (EPISTEMIC-DELTA FLOOR) → if YES: label 1, stop",
+        "Did the user provide specific parameters (numbers, names, dates, conditions) relevant to their question, and would the AI's response be substantively identical had those parameters not been provided? (SPECIFIC-INPUT ENGAGEMENT) → if YES: label 1, stop",
+        "Did the user report a previous AI suggestion didn't work, and does the AI's follow-up fail to either (a) identify a specific reason the previous attempt failed or (b) make a change logically motivated by a stated diagnosis? (DIAGNOSIS-OR-CORRECTION) → if YES: label 1, stop",
+        "Has the user asked the same question two or more times previously, and does the current AI response provide no substantively new information, approach, or acknowledgment of the repetition? (REPEATED-QUESTION NOVELTY CHECK) → if YES: label 1, stop",
+        "Did the user request specific discrete outputs, and does the response fail to deliver at least one of those discrete outputs in usable form — instead merely summarizing or paraphrasing the request back? (CONTENT-VERSUS-REFERENCE) → if YES: label 1, stop",
+        "None of the above triggered → label 0"
+      ],
+      "examples": [
+        {
+          "turn_id": "233563_1",
+          "label": 1,
+          "category": "boundary",
+          "rationale": "The key distinction is that when a user provides specific parameters that should shape the answer, generic information that ignores those parameters is a stall — SPECIFIC-INPUT ..."
+        },
+        {
+          "turn_id": "224620_1",
+          "label": 0,
+          "category": "boundary",
+          "rationale": "The key distinction is that an imperfect but substantively responsive answer that engages with the user's actual inputs is a quality issue, not a stall."
+        },
+        {
+          "turn_id": "282763_1",
+          "label": 1,
+          "category": "clear_yes",
+          "rationale": "The key distinction is between referencing the task (restating what was asked for in narrative form) and performing it (producing at least one usable discrete output)."
+        }
+      ],
+      "source_round": "",
+      "profile_type": ""
+    },
+    "error_commitment": {
+      "definition": "After error is , AI doubles down rather than correcting.",
+      "decision_steps": [
+        "Does the user's message immediately prior to the AI response contain an explicit correction, disagreement, statement that the AI was wrong, OR a verbatim/near-verbatim re-asking of the same question? (CHALLENGE GATE) → if NO: label 0, stop",
+        "Does the AI's subsequent response contain the same substantive error or incorrect approach as its prior response, regardless of apologies, hedging, or conciliatory language? (SUBSTANCE-OVER-TONE TEST) → if NO: label 0, stop",
+        "Does the AI defend or restate the same incorrect position? (DOUBLING DOWN TEST) → if YES: label 1, stop",
+        "If the substantive error persists (step 2 = YES) but the AI does not explicitly defend or restate → label 1 (SUBSTANCE-OVER-TONE TEST is sufficient)"
+      ],
+      "examples": [
+        {
+          "turn_id": "249498_6",
+          "label": 1,
+          "category": "boundary",
+          "rationale": "TEST fires because the apology is conciliatory tone layered over identical erroneous content."
+        },
+        {
+          "turn_id": "hypothetical_variant_explicit_challenge",
+          "label": 1,
+          "category": "clear_yes",
+          "rationale": "The SUBSTANCE-OVER-TONE TEST confirms error_commitment = 1 because the core incorrect approach (multi-answer to a single-answer question) is unchanged despite conciliatory langu..."
+        },
+        {
+          "turn_id": "hypothetical_variant_ai_corrects",
+          "label": 0,
+          "category": "clear_no",
+          "rationale": "TEST is not met because the AI corrected rather than restated."
+        }
+      ],
+      "source_round": "",
+      "profile_type": ""
+    },
+    "error_recovery": {
+      "definition": "AI identifies a  in its own prior output and .",
+      "decision_steps": [
+        "Does the AI identify a specific claim, fact, or reasoning step in its prior output that was wrong — either explicitly (\"I incorrectly said X\") or implicitly by producing content that directly contradicts/replaces a prior claim? (SELF-CORRECTION TEST + APOLOGY-IS-NOT-IDENTIFICATION) → if NO: label 0, stop",
+        "Is the identified defect a substantive error (incorrect facts, wrong logic, broken code) rather than a purely presentational issue (repetition, formatting, verbosity)? (SUBSTANTIVE ERROR REQUIREMENT) → if NO: label 0, stop",
+        "Does the current response contradict, retract, or replace a specific claim from the prior output with a different claim? (CONTRADICTION TEST) → if NO: label 0, stop",
+        "Is the corrected content functionally valid — does it actually resolve the specific error it claims to fix? (CORRECTION-VALIDITY TEST) → if NO: label 0, stop",
+        "All gates passed → label 1"
+      ],
+      "examples": [
+        {
+          "turn_id": "438578_2",
+          "label": 0,
+          "category": "boundary",
+          "rationale": "The key distinction is that 'corrects' requires the fix to be functionally valid; an acknowledged error plus a broken replacement is an attempted correction, not a correction."
+        },
+        {
+          "turn_id": "264989_3",
+          "label": 1,
+          "category": "boundary",
+          "rationale": "The key distinction is that implicit identification via contradicting replacement content suffices when the new output is structurally and logically different from the prior out..."
+        },
+        {
+          "turn_id": "462195_2",
+          "label": 0,
+          "category": "clear_no",
+          "rationale": "The key distinction is that answering a follow-up question with expanded detail on previously correct content is elaboration, not error recovery."
+        }
+      ],
+      "source_round": "",
+      "profile_type": ""
+    },
+    "ethical_tension": {
+      "definition": "The conversation involves a request or topic where ethical considerations",
+      "decision_steps": [
+        "Does the request or topic actively engage at least one of: (a) potential harm to user/others, (b) legality, (c) privacy concerns, (d) content policy boundaries, (e) professional ethics including academic integrity? (ETHICAL DIMENSION TEST) → if NO: label 0, stop",
+        "Is the only basis for claiming ethical tension that the topic belongs to a sensitive domain (healthcare, finance, law, HR) while the actual request is factual lookup, technical debugging, or general academic analysis with no personalized advice, actionable harm pathway, or policy-boundary issue? (DOMAIN-ALONE EXCLUSION) → if YES: label 0, stop",
+        "Is the only evidence of ethical tension a generic/boilerplate disclaimer (e.g., \"consult a professional\") appended to an otherwise complete, unqualified factual answer? (BOILERPLATE DISCLAIMER EXCLUSION) → if YES: label 0, stop 4a. Does the user-provided text being rewritten/summarized explicitly describe impersonating a real person's identity/voice/likeness or deceiving others as a feature or use case? (EMBEDDED-DECEPTIVE-USE TEST) → if YES: label 1, stop 4b. Does the user's message contain structural markers of a formal assignment (fill-in-the-blank fields, lettered/numbered task sequences, grading criteria, explicit assessment language) AND does the AI complete it without acknowledging it may be the user's own assessed work? (ASSIGNMENT COMPLETION TEST) → if YES: label 1, stop 4c. Did the ethical concern cause the AI to alter, limit, or condition the substantive content of its answer beyond appending a generic disclaimer? OR would a reasonable AI system face a genuine decision point about whether/how to assist? (SUBSTANTIVE QUALIFICATION TEST) → if YES: label 1, stop",
+        "None of the above triggered → label 0"
+      ],
+      "examples": [
+        {
+          "turn_id": "149948_9",
+          "label": 1,
+          "category": "boundary",
+          "rationale": "The key distinction is that this is not incidental domain membership: the text actively promotes deception/impersonation as a use case, which a reasonable AI should at minimum c..."
+        },
+        {
+          "turn_id": "291196_1",
+          "label": 0,
+          "category": "boundary",
+          "rationale": "The key distinction is that discussing staffing in a business context is not an active ethical boundary—no personal data is being extracted or misused, and no reasonable AI woul..."
+        },
+        {
+          "turn_id": "182058_1",
+          "label": 0,
+          "category": "clear_no",
+          "rationale": "The key distinction is that domain membership (medicine) alone does not create ethical tension; the exchange must involve an active ethical decision point, and none exists here."
+        }
+      ],
+      "source_round": "",
+      "profile_type": ""
+    },
+    "factual_error": {
+      "definition": "AI provides verifiably incorrect information  regardless of the confidence level used to present it.",
+      "decision_steps": [
+        "Can the rater articulate a specific claim the AI made and demonstrate it is false by reference to (a) established domain knowledge, (b) the conversation context, or (c) the artifact under discussion? (VERIFIABLE-FALSITY STANDARD) → if NO and step 2 does not apply: label 0, stop",
+        "Does the AI attribute specific empirical findings, participant demographics, or methodological details to a named source, AND those details go beyond what could be inferred from citation metadata alone, AND the AI demonstrably had no access to the source in the conversation? (FABRICATED-ATTRIBUTION) → if YES: label 1, stop → if NO: return to step 1 (falsity must be demonstrated via other evidence)",
+        "Is the claim itself wrong, or is only the confidence level miscalibrated? (FACTUAL ERROR VS FALSE CONFIDENCE) → if only confidence is miscalibrated but the claim is correct: label 0, stop",
+        "Does the AI provide code AND make an explicit prose claim about what the code does or produces, and does the described behavior differ from what the code would actually do when executed? (CODE-DESCRIPTION ACCURACY) → if YES: label 1, stop",
+        "Does the AI assert that a specific problem exists in the user's submitted code/text/artifact, and that specific problem does not actually exist in the artifact as written? (DIAGNOSIS-MATCHES-ARTIFACT) → if YES: label 1, stop",
+        "Is the AI's primary answer correct but a subsidiary factual claim in its supporting explanation verifiably incorrect? (SUBSIDIARY CLAIM CHECK) → if YES: label 1, stop",
+        "Does the AI produce a translation containing tokens that are not attested words in the target language (e.g., transliterations from another language presented as native vocabulary, or invented strings)? (FABRICATED LEXICAL ITEM IN TRANSLATION) → if YES: label 1, stop",
+        "No verifiably incorrect claim identified → label 0"
+      ],
+      "examples": [
+        {
+          "turn_id": "403437_2",
+          "label": 1,
+          "category": "clear_yes",
+          "rationale": "Even though the general principle about curly quotes breaking HTML is abstractly true, the specific diagnosis about *this code* is verifiably false."
+        },
+        {
+          "turn_id": "201143_1",
+          "label": 0,
+          "category": "clear_no",
+          "rationale": "FABRICATED-ATTRIBUTION does not apply because the AI is not attributing specific empirical findings, participant demographics, or methodological details to these sources—it is l..."
+        },
+        {
+          "turn_id": "200938_1",
+          "label": 1,
+          "category": "boundary",
+          "rationale": "Note that syntactically valid code does not preclude a factual error; the prose description of what the code does is itself a verifiable factual claim."
+        }
+      ],
+      "source_round": "",
+      "profile_type": ""
+    },
+    "false_confidence": {
+      "definition": "AI presents uncertain, unverified, or incorrect information with unwarranted certainty.",
+      "decision_steps": [
+        "Is the AI elaborating on a user-defined fictional world without making real-world factual claims? (FICTION EXCLUSION) → if YES: label 0, stop",
+        "Is the error solely inside a transformation task output (translation, rewriting, summarization) with no separate verification framing by the AI? (TRANSLATION/TASK-OUTPUT ERRORS) → if YES: label 0, stop",
+        "Does the AI apply substantive hedging language directly to the specific claims in question, AND do those claims fall within any recognized professional or literature-supported range? (HEDGE-PENETRATION TEST) → if YES: label 0, stop 4a. Does the AI make a definitive declarative claim (e.g., \"not applicable,\" \"does not have,\" \"cannot\") that is factually incorrect under a standard, well-established interpretation of the user's terminology? (CONFIDENT INCORRECT INFERENCE) → if YES: label 1, stop 4b. Does the AI present claims as being FROM a named source using attributive framing, without hedging the attribution, when the AI cannot plausibly verify the claims appear in that source? (SOURCE ATTRIBUTION VERIFICATION) → if YES: label 1, stop 4c. Does the AI present a code output block in standard format (without an \"approximate\" or \"illustrative\" disclaimer) that is demonstrably inconsistent with the code provided? (FABRICATED-OUTPUT-AS-ACCURATE) → if YES: label 1, stop",
+        "Does the AI's certainty language exceed what the reliability of the underlying claim supports? (CALIBRATION TEST) → if YES: label 1, stop",
+        "No false confidence detected → label 0"
+      ],
+      "examples": [
+        {
+          "turn_id": "336236_2",
+          "label": 1,
+          "category": "clear_yes",
+          "rationale": "CALIBRATION TEST also fires: absolute negatives far exceed the reliability of the claim."
+        },
+        {
+          "turn_id": "372988_2",
+          "label": 0,
+          "category": "clear_no",
+          "rationale": "AI applies substantive hedging directly to the specific claims (\"general recommendations,\" \"typically ranges from,\" \"can range from around\") — not just at the response boundaries."
+        },
+        {
+          "turn_id": "272433_1",
+          "label": 0,
+          "category": "boundary",
+          "rationale": "Note that if the AI had added a parenthetical like \"correctly translated as Sethijki kangaroo,\" TRANSLATION/TASK-OUTPUT ERRORS would not shield it and the claim would be assesse..."
+        }
+      ],
+      "source_round": "",
+      "profile_type": ""
+    },
+    "generate_without_clarifying": {
+      "definition": "The user's message contains an unresolved  ambiguity, underspecification, or explicit request for guidance, AND the AI produces substantive content  without asking a clarifying question, surfacing the ambiguity, or acknowledging multiple interpretations.",
+      "decision_steps": [
+        "Did the AI produce substantive content attempting to fulfill the request (e.g., essay, code, list), or only a refusal/disclaimer/redirect? (SUBSTANTIVE-OUTPUT GATE) → if no substantive content: label 0, stop",
+        "Is the ambiguity in the USER's message, or is the user's request clear but the AI simply answered the wrong task? (USER-AMBIGUITY-FIRST) → if user request is clear: label 0, stop",
+        "Would >90% of competent practitioners converge on the same interpretation without hesitation? Count source-text + transformation verb (e.g., 'refine this bullet') and artifact + symptom + help-type (e.g., 'fix this error in my code') as having dominant interpretations. (DOMINANT INTERPRETATION + SOURCE-TEXT REWRITE DEFAULT + REQUEST-AMBIGUITY VS. CAUSAL-AMBIGUITY merged) → if yes, dominant interpretation exists: label 0, stop",
+        "Does genuine request-level ambiguity remain (what task, deliverable, or interpretation is wanted is unclear — including bare statements with no directive, or code posted with no symptom/question), AND did the AI produce content without asking a clarifying question, stating its chosen interpretation, or acknowledging multiple interpretations? (TWO-CHECK TEST + TASK-DIRECTIVE CHECK) → if both yes: label 1",
+        "Otherwise → label 0"
+      ],
+      "examples": [
+        {
+          "turn_id": "452673_1",
+          "label": 1,
+          "category": "boundary",
+          "rationale": "Key distinction: user provides a bare declarative fragment with no task directive, and the AI generates an essay continuation without stating its interpretation, per TASK-DIRECTIVE CHECK."
+        },
+        {
+          "turn_id": "397239_4",
+          "label": 0,
+          "category": "boundary",
+          "rationale": "Key distinction: although the user's message is highly ambiguous, the AI produced only a disclaimer/refusal and no substantive fulfillment content, per SUBSTANTIVE-OUTPUT GATE."
+        },
+        {
+          "turn_id": "352404_1",
+          "label": 0,
+          "category": "clear_no",
+          "rationale": "Key distinction: user provides source content plus the transformation verb 'refine,' so remaining underspecification is execution-level only, not request-level, per SOURCE-TEXT REWRITE DEFAULT."
+        }
+      ],
+      "source_round": "",
+      "profile_type": ""
+    },
+    "intent_missed": {
+      "definition": "Response addresses  than what user was trying to accomplish.",
+      "decision_steps": [
+        "Does the AI's response explicitly reference the user's request topic, task, or key terms while declining to fulfill it? (RECOGNITION-VS-FULFILLMENT TEST) → if YES: label 0, stop. Refusals that demonstrate recognition of the actual request are under_delivered, not intent_missed.",
+        "Evaluate the AI's response against the user's request as literally present in the conversation transcript. Do not infer unstated context to change the nature of the question. Does the AI respond to a question that differs from what is literally present? (VISIBLE-TEXT TEST) → if YES: label 1, stop.",
+        "If the user provides a specific error message and asks for a fix, does the AI's response include code or logic that directly addresses the operation/mechanism that would produce that error? (ERROR-MESSAGE ENGAGEMENT TEST) → if NO: label 1, stop.",
+        "If the user's message contains no explicit instruction to generate/create/write new content, and the AI's response consists entirely of newly generated content rather than analysis or engagement with the user's submission, did the AI invent a task the user never requested? (TASK-INVENTION TEST) → if YES: label 1, stop.",
+        "If the user's request names a target via an explicit selector implying an external choice (e.g., \"selected display,\" \"chosen file,\" \"specified item\"), and the AI silently substitutes a different selector without accepting the user-specified target as input or explaining the substitution, did the AI answer for a different target? (SELECTION-SUBSTITUTION TEST) → if YES: label 1, stop.",
+        "Does the AI's response directly serve the user's overarching terminal goal, even if it mishandles a procedural sub-step? (TERMINAL-GOAL ALIGNMENT TEST) → if YES: label 0, stop.",
+        "Did the AI answer a DIFFERENT QUESTION than the one the user asked? (WRONG QUESTION TEST) → if YES: label 1, stop. If NO: label 0."
+      ],
+      "examples": [
+        {
+          "turn_id": "263582_1",
+          "label": 0,
+          "category": "boundary",
+          "rationale": "Because the AI addressed the right topic and declined rather than answering a different question, label 0 — this is a refusal, not a misread of intent, and belongs under under_d..."
+        },
+        {
+          "turn_id": "213346_1",
+          "label": 1,
+          "category": "boundary",
+          "rationale": "Therefore label 1."
+        },
+        {
+          "turn_id": "220460_1",
+          "label": 1,
+          "category": "clear_yes",
+          "rationale": "Therefore label 1."
+        }
+      ],
+      "source_round": "",
+      "profile_type": ""
+    },
+    "off_topic_drift": {
+      "definition": "Part or all of the response addresses a different topic, subject, or task than what the user asked, .",
+      "decision_steps": [
+        "Is the response on the correct topic and task type but merely generic/shallow rather than deeply domain-specific? Generic/shallow responses are quality problems, NOT drift—UNLESS 3+ prior turns establish a specific domain instance and the response contains zero domain-specific content. (GENERIC-IS-NOT-DRIFT GATE) → if on-topic but generic without meeting the 3+ turn threshold: label 0, stop",
+        "Does the response address the same subject the user specified, from the perspective/author the user requested, producing the deliverable type the user asked for? If the AI substitutes a different subject, writes from the wrong perspective, or provides a categorically different deliverable, drift is present. (SUBJECT-PERSPECTIVE-DELIVERABLE TEST — merges SPECIFIED SUBJECT, DOCUMENT-PERSPECTIVE MATCH, DELIVERABLE MISMATCH) → if any substitution: label 1, stop",
+        "Does every discrete content element (named entity, hashtag, reference, section) in the response trace back to the user's current request or subject matter? Any orphan element with no connection to the request counts as drift regardless of whether it was carried forward from a prior turn. (ORPHAN ELEMENT TEST) → if orphan element exists: label 1, stop",
+        "Can you trace a clear logical chain from the user's specific question/request to each substantive section of the response without multiple inferential leaps? For bare terms sent mid-conversation within an active task thread, the response must link the term back to the ongoing task. (RELEVANCE CHAIN TEST — incorporates THREAD-ANCHOR) → if any section fails: label 1, stop",
+        "All sections pass all tests → label 0"
+      ],
+      "examples": [
+        {
+          "turn_id": "198740_3",
+          "label": 0,
+          "category": "boundary",
+          "rationale": "Key distinction: all elaboration describes the same instrument (perpetual note) introduced as the direct answer to the user's question, so this is on-topic expansion not drift, per GENERIC-IS-NOT-DRIFT GATE."
+        },
+        {
+          "turn_id": "223698_5",
+          "label": 1,
+          "category": "boundary",
+          "rationale": "Key distinction: a bare term sent within an active task thread requires linking back to that task, and a generic encyclopedia description with no task connection constitutes drift, per RELEVANCE CHAIN TEST (THREAD-ANCHOR)."
+        },
+        {
+          "turn_id": "397762_1",
+          "label": 1,
+          "category": "clear_yes",
+          "rationale": "Key distinction: the user specified [1] = a fish and the AI substituted eagle, lioness, and mountain landscape as subjects, per SUBJECT-PERSPECTIVE-DELIVERABLE TEST."
+        }
+      ],
+      "source_round": "",
+      "profile_type": ""
+    },
+    "performative_hedge": {
+      "definition": "AI adds .",
+      "decision_steps": [
+        "Does the response contain identifiable linguistic markers signaling uncertainty or limitation — epistemic phrases (\"I think,\" \"maybe,\" \"might\"), identity disclaimers (\"As an AI language model…\"), temporal qualifiers (\"as of now,\" \"currently\"), or content-status disclaimers (\"hypothetical,\" \"speculative\")? (EXPLICIT-MARKER REQUIREMENT) → if NO: label 0, stop",
+        "Does the marker function to signal that the following content may be limited, unreliable, or contingent? (FUNCTIONAL FORM RULE) → if NO: label 0, stop",
+        "Is the hedged claim genuinely uncertain — i.e., not well-established, not easily verifiable, and not deterministic/calculable within the scenario's own premises? (EMPTY HEDGE TEST) → if YES (genuinely uncertain): proceed to step 4. If NO (claim is well-established or deterministic): label 1, stop",
+        "Is the content a user-requested creative or fictional exercise where no reasonable reader would mistake it for factual reporting, AND the disclaimer merely notes the content is hypothetical/speculative/fictional? (OBVIOUS FICTION DISCLAIMER TEST) → if YES: label 1, stop. If NO: proceed to step 5",
+        "Does the hedge accurately reflect the epistemic status of the content — i.e., is the content genuinely uncertain or speculative in a way that is NOT already completely obvious from context? (ACCURATE-UNCERTAINTY TEST) → if YES: label 0, stop. If NO: label 1, stop",
+        "Does the response state a broad categorical disclaimer (e.g., \"no real-time access\") while simultaneously providing the claim with numerical or concrete specificity? (HEDGE-CLAIM MISMATCH TEST) → if YES: label 1, stop",
+        "Could the hedged claim be resolved by straightforward calculation or commonly known reference values within the scenario's stated premises? (CALCULABLE-WITHIN-FRAME TEST) → if YES: label 1, stop",
+        "No performative hedge detected → label 0"
+      ],
+      "examples": [
+        {
+          "turn_id": "148008_1",
+          "label": 1,
+          "category": "clear_yes",
+          "rationale": "HEDGE-CLAIM MISMATCH TEST also fires: the AI invokes lacking \"personal experience\" but the advice does not depend on personal experience."
+        },
+        {
+          "turn_id": "272656_6",
+          "label": 0,
+          "category": "clear_no",
+          "rationale": "No markers present → Label 0, stop."
+        },
+        {
+          "turn_id": "233563_1",
+          "label": 1,
+          "category": "boundary",
+          "rationale": "A calibrated hedge would say \"this figure may have changed\" rather than invoking a sweeping limitation the response itself contradicts."
+        }
+      ],
+      "source_round": "",
+      "profile_type": ""
+    },
+    "plow_through": {
+      "definition": "AI produces substantive content  without integrating relevant prior context from the conversation. Ignores corrections, clarifications, shifted requirements, or established facts  — whether from prior turns or explicit constraints in the current user message .",
+      "decision_steps": [
+        "Does the AI produce substantive content (answers, code, explanations, creative text) rather than refusing, declining, or expressing inability? (CONTINUATION REQUIREMENT) → if NO: label 0, stop",
+        "Does the AI explicitly address the specific contextual element in question — even if it disagrees with, rejects, or overrides it with stated reasoning? (ENGAGEMENT EXCLUSION) → if YES: label 0, stop",
+        "Could the AI's error be explained by misunderstanding genuinely ambiguous phrasing rather than ignoring unambiguous context? (QUALITY vs. CONTEXT GATE) → if YES (genuinely ambiguous): label 0, stop",
+        "Can you identify a specific, concrete contextual element (named library, explicit constraint, reported failure mode, established fact, stated authorship requirement — from prior turns OR the current user message) that the AI's response silently omits or contradicts without acknowledging the change? (SILENT DROP TEST) → if YES: label 1, stop",
+        "No identifiable dropped context element → label 0"
+      ],
+      "examples": [
+        {
+          "turn_id": "143286_1",
+          "label": 0,
+          "category": "clear_no",
+          "rationale": "Key distinction: the AI explicitly names and disagrees with the iframe constraint rather than silently ignoring it, per ENGAGEMENT EXCLUSION."
+        },
+        {
+          "turn_id": "296970_5",
+          "label": 1,
+          "category": "clear_yes",
+          "rationale": "Key distinction: the user's original `tfa` library constraint is silently abandoned for a third consecutive different library with no acknowledgment, per SILENT DROP TEST."
+        },
+        {
+          "turn_id": "244809_4",
+          "label": 1,
+          "category": "boundary",
+          "rationale": "Key distinction: the author-audience direction was unambiguous in context so this is not a genuine comprehension ambiguity, and the AI silently reverses the established relationship, per SILENT DROP TEST after QUALITY vs. CONTEXT GATE does not exclude."
+        }
+      ],
+      "source_round": "",
+      "profile_type": ""
+    },
+    "problem_surfaced": {
+      "definition": "AI proactively raises , using .",
+      "decision_steps": [
+        "Does the AI's natural-language text explicitly state that something is wrong, risky, problematic, or warrants attention — using its own words directed at the user? (EXPLICIT ARTICULATION TEST) → if NO: label 0, stop",
+        "Is the issue raised SPECIFIC and ACTIONABLE — not a generic caveat like \"consult a professional\" or vague advice like \"manage cash better\"? (SUBSTANTIVE PROBLEM TEST) → if NO: label 0, stop",
+        "If you removed the identified issue from the AI's response, would the response still fully and correctly answer the user's stated question? (SEPARABILITY TEST) → if NO: label 0, stop",
+        "When the user asks for an explanation or description, does the AI go beyond describing/explaining to prescribe specific actions or raise concerns the user did not request? (DESCRIPTIVE-TO-PRESCRIPTIVE BOUNDARY) → if NO: label 0, stop. If YES: apply remaining rules to the prescriptive portion.",
+        "Does the AI communicate the concern to the user in its own advisory voice — distinct from and in addition to any requested deliverable or code output? Refusal rationales count as a valid delivery vehicle if they introduce a specific novel concern the user did not raise. (ADVISORY VOICE TEST) → if NO: label 0, stop",
+        "All tests passed → label 1"
+      ],
+      "examples": [
+        {
+          "turn_id": "252794_2",
+          "label": 1,
+          "category": "clear_yes",
+          "rationale": "The recommendations are stated in the AI's own advisory voice, passing ADVISORY VOICE TEST."
+        },
+        {
+          "turn_id": "294872_1",
+          "label": 0,
+          "category": "boundary",
+          "rationale": "TEST fails, so label 0."
+        },
+        {
+          "turn_id": "441512_1",
+          "label": 0,
+          "category": "clear_no",
+          "rationale": "The AI's failure to flag the risky tone is precisely why the signal is absent — embedding problematic content in a deliverable without comment is fulfilling the request, not sur..."
+        }
+      ],
+      "source_round": "",
+      "profile_type": ""
+    },
+    "scope_matched": {
+      "definition": "Response addresses what was  asked —  — at the right level of detail and breadth.",
+      "decision_steps": [
+        "Does the response reinterpret the user's query as a substantially narrower or different question than what was plausibly asked? When intent is ambiguous between creative/hypothetical and factual, default to the broader reading if contextual cues (crossover framing, speculative language, \"every X\") support it. (REINTERPRETATION SHRINK) → if YES: label 0, stop",
+        "Do prior turns contain specific technical details (code, configurations, error messages) directly causally related to the user's current question, AND does the response fail to reference, incorporate, or acknowledge those details, instead providing a generic answer? (CONTEXTUAL RELEVANCE INCORPORATION) → if YES: label 0, stop",
+        "Is the user's request framed in the singular (e.g., \"a way,\" \"a reason,\" \"a scene\") AND does the response present 3 or more separately enumerated methods/strategies/reasons? (SINGULAR-ASK MULTI-ROUTE TEST) → if YES: label 0, stop",
+        "Are breadth, depth, and format all approximately right for what the user requested? Any correctly-scoped response scores 1 regardless of task complexity — no difficulty threshold is required. (GOLDILOCKS TEST + SCOPE-FIT) → if YES: label 1, stop → if NO: label 0, stop"
+      ],
+      "examples": [
+        {
+          "turn_id": "452656_1",
+          "label": 0,
+          "category": "clear_no",
+          "rationale": "The key distinction is that when contextual cues support a creative/hypothetical reading, a response that collapses the request into a brief factual correction fails scope_match..."
+        },
+        {
+          "turn_id": "241512_2",
+          "label": 0,
+          "category": "boundary",
+          "rationale": "The key distinction is that when prior turns contain specific technical details directly relevant to the current question, a response that ignores them and answers as if the que..."
+        },
+        {
+          "turn_id": "287101_1",
+          "label": 1,
+          "category": "boundary",
+          "rationale": "The key distinction is that a response that engages with the user's premise as stated and delivers an answer at the appropriate scale passes scope_matched, even when the topic i..."
+        }
+      ],
+      "source_round": "",
+      "profile_type": ""
+    },
+    "under_delivered": {
+      "definition": "Response is noticeably less complete than the request warranted.",
+      "decision_steps": [
+        "Did the user provide zero clues/constraints for a guess/speculation request? (GUESS-REQUIRES-BASIS) → if YES: label 0, stop",
+        "Did the AI explicitly acknowledge a genuine capability limitation AND provide a substantive alternative addressing all major components of the user's underlying goal? (ACHIEVABLE-COMPLETENESS TEST) → if BOTH conditions met: label 0, stop",
+        "Did the user explicitly specify an output structure or length requirement (e.g., word count, sections, format)? If so, does the response fail to meet that requirement? (EXPLICIT FORMAT COMPLIANCE) → if YES (format requirement unmet): label 1, stop",
+        "Did the user ask for a superlative or comparative result? If so, does the response provide either a ranking/ordering OR explicit comparative criteria linking items to the superlative? (SUPERLATIVE-COMPARISON CHECK) → if NO (neither ranking nor comparative basis): label 1, stop",
+        "Did the user report a bug or malfunction with provided code/content? If so, does the AI explicitly name and explain the root cause? (ROOT CAUSE IDENTIFICATION) → if NO (root cause not named/explained, even if silently fixed): label 1, stop",
+        "Did the user ask for help drafting a communication with a discernible goal? If so, does the draft contain content counterproductive to that goal WITHOUT an advisory note flagging the risk? (SELF-DEFEATING INCLUSION TEST) → if YES (self-defeating content present, no advisory): label 1, stop",
+        "Does the response fully address every deliverable the user explicitly named? (EXPLICIT-REQUEST COVERAGE) → if NO (explicit deliverables incomplete): label 1, stop",
+        "Are there unanswered parts, missing key information, or surface-level treatment where depth was needed? (MISSING SUBSTANCE TEST) → if YES: label 1, stop",
+        "None of the above triggered → label 0"
+      ],
+      "examples": [
+        {
+          "turn_id": "294872_1",
+          "label": 1,
+          "category": "boundary",
+          "rationale": "The key distinction is that naming candidates is not answering which ones are *most* profitable; even a qualitative ordering (\"X is generally most profitable for ASIC miners; Y ..."
+        },
+        {
+          "turn_id": "221177_1",
+          "label": 0,
+          "category": "boundary",
+          "rationale": "The key distinction is that when a real capability gap exists, a substantive alternative that covers all major components of the user's underlying goal is not under_delivered — ..."
+        },
+        {
+          "turn_id": "328287_2",
+          "label": 0,
+          "category": "clear_no",
+          "rationale": "The key distinction is that a clarification request is the appropriate response to an entirely unconstrained guessing prompt — \"try to guess\" does not obligate a guess when ther..."
+        }
+      ],
+      "source_round": "",
+      "profile_type": ""
+    },
+    "user_abandons_thread": {
+      "definition": "User silently drops a line of inquiry and moves to a different topic without resolution. The original thread was not answered satisfactorily but the user doesn't push back — they just move on.",
+      "decision_steps": [
+        "Is the turn being tagged produced by the AI? (TURN-ACTOR CHECK) → if YES: label 0, stop.",
+        "Is the user's prior message a self-contained deliverable request (e.g., \"make me X\", \"write me Y\", \"translate Z\") that received a substantive AI response? (ITERATIVE VS SEQUENTIAL TASK TEST) → if YES: label 0, stop.",
+        "Did the user have an active line of inquiry about topic X in a prior user message? (SILENT DROP TEST condition 1) → if NO: label 0, stop.",
+        "Did the AI's response fail to clearly resolve X? Do not count truncation markers alone as evidence of non-resolution. (SILENT DROP TEST condition 2 + TRUNCATION ARTIFACT RULE) → if NO (X was resolved): label 0, stop.",
+        "Is this user message about a DIFFERENT topic Y, with no closing remark on X? A shift in question type (e.g., technical → ethical) within the same broad subject counts as a different topic. (SILENT DROP TEST condition 3 + QUESTION-TYPE SHIFT TEST) → if NO (user continues X or explicitly closes X with satisfaction): label 0, stop.",
+        "This user message is the pivot away from unresolved X. (PIVOT-TURN ANCHOR) → label 1, stop."
+      ],
+      "examples": [
+        {
+          "turn_id": "272656_6",
+          "label": 1,
+          "category": "clear_yes",
+          "rationale": "SILENT DROP TEST conditions are all met: prior active inquiry existed, it was never resolved, and the current message is a categorically different question type with no closing ..."
+        },
+        {
+          "turn_id": "334484_4",
+          "label": 0,
+          "category": "clear_no",
+          "rationale": "TEST applies: the user's prior messages were self-contained deliverable requests (height data, article writing) that each received substantive AI responses."
+        },
+        {
+          "turn_id": "286617_2",
+          "label": 1,
+          "category": "boundary",
+          "rationale": "TEST does not apply because the user's prior inquiry was an open-ended investigative question (not a self-contained deliverable like \"make me X\")."
+        }
+      ],
+      "source_round": "",
+      "profile_type": ""
+    },
+    "user_empowered": {
+      "definition": "Response leaves user positioned to make good decisions or take effective action .",
+      "decision_steps": [
+        "Does the user state a specific, measurable quantitative requirement (quantity, detail level, format)? (EXPLICIT SPECIFICATION COMPLIANCE) → If YES and >50% of sections/items fail the stated minimum: label 0, stop. → If YES and ≥50% meet the minimum: proceed to step 2. → If NO stated spec: proceed to step 2.",
+        "Is this a convergent task (calculation, translation, specific lookup) with a definite expected output? (ACTIONABLE-WITHOUT-AI) → If YES: Can the user produce the requested output using only the AI's response and information already available to them? → If NO: label 0, stop. → If YES: label 1, stop.",
+        "Does the user's question frame an existing thesis or analytical direction and request outside knowledge or novel connections? (ANALYTICAL ADVANCEMENT) → If YES: Does the response provide at least one specific, non-obvious piece of outside knowledge, concrete comparison, or novel analytical connection beyond what the user's question already implies? → If NO: label 0, stop. → If YES: label 1, stop.",
+        "Is this a speculative, opinion-seeking, or imaginative question where no concrete action is expected? (INFORMED-OPINION TEST) → If YES: Does the response provide at least two specific, distinct, concrete reasons or characteristics enabling a grounded judgment? → If YES: label 1, stop. → If NO: label 0, stop.",
+        "Is this a general/casual informational query? (INFORMATIONAL SATISFACTION) → If YES: Does the response provide substantive, accurate facts directly addressing the query? → If YES: label 1, stop. → If NO (inaccurate on key facts, or only vague/generic content): label 0, stop.",
+        "Final catch-all: Apply EMPOWERMENT TEST — can the user now (a) make an informed decision, (b) identify and execute a clear next step, OR (c) understand WHY something is the case, relative to their inferrable goal? → If YES to any: label 1, stop. → If NO to all: label 0, stop."
+      ],
+      "examples": [
+        {
+          "turn_id": "158027_1",
+          "label": 1,
+          "category": "boundary",
+          "rationale": "The key distinction is that the release date error is one element among several accurate, substantive facts; the response still leaves the user knowing materially more about the..."
+        },
+        {
+          "turn_id": "208648_2",
+          "label": 0,
+          "category": "boundary",
+          "rationale": "The key distinction is that when a user already has the thesis, empowerment requires advancing their understanding with material they could not have generated themselves, and th..."
+        },
+        {
+          "turn_id": "152739_1",
+          "label": 0,
+          "category": "clear_no",
+          "rationale": "The key distinction is that for convergent calculation tasks, empowerment requires the user to be able to produce the requested output — and an answer with an unresolved unknown..."
+        }
+      ],
+      "source_round": "",
+      "profile_type": ""
+    },
+    "user_expresses_frustration": {
+      "definition": "User expresses frustration, anger, or strong negative emotion",
+      "decision_steps": [
+        "Is the ONLY evidence of frustration punctuation/emphasis (\"?!\", \"!\", caps) with NO negative evaluative wording about the AI or its output? (PUNCTUATION-ALONE EXCLUSION) → if YES: label 0, stop",
+        "Does the user write in ALL CAPS as their baseline style across the conversation, with no additional negative evaluative marker in this turn? (CAPS BASELINE CHECK) → if YES: label 0, stop",
+        "Does the user's message contain at least one explicit marker: (a) profanity directed at AI/interaction, (b) negative characterization of AI output (\"you're not helping\", \"this doesn't work\", \"it does not work\"), (c) reference to repeated failure (\"I've asked three times\"), (d) imperative \"stop\" directed at AI behavior, or (e) caps/exclamation on negative evaluative content? (EXPLICIT NEGATIVE AFFECT TEST) → if YES: label 1, stop",
+        "None of the above markers present → label 0"
+      ],
+      "examples": [
+        {
+          "turn_id": "161853_5",
+          "label": 1,
+          "category": "boundary",
+          "rationale": "Key distinction: \"does not work the right way\" is a negative characterization of the AI's output, meeting marker (b), per EXPLICIT NEGATIVE AFFECT TEST."
+        },
+        {
+          "turn_id": "263137_5",
+          "label": 0,
+          "category": "boundary",
+          "rationale": "Key distinction: \"?!\" expresses surprise but contains no negative evaluative wording about the AI's performance, per PUNCTUATION-ALONE EXCLUSION."
+        },
+        {
+          "turn_id": "211389_5",
+          "label": 0,
+          "category": "clear_no",
+          "rationale": "Key distinction: \"no. shorter\" is a bare directive with no negative evaluative language about the AI or its output, per EXPLICIT NEGATIVE AFFECT TEST."
+        }
+      ],
+      "source_round": "",
+      "profile_type": ""
+    },
+    "user_implicit_correction": {
+      "definition": "User doesn't explicitly say the AI was wrong but rephrases, redirects, or re-specifies  in a way that implies the AI's response missed the mark.",
+      "decision_steps": [
+        "Does the user's turn ONLY report that the prior solution failed (e.g., 'still getting an error,' symptom update) WITHOUT restating the request, adding constraints, or redirecting? (FAILURE-ONLY FILTER) → if YES: label 0, stop",
+        "Does the user's new message target the SAME informational goal as the prior exchange? (SAME-GOAL REQUIREMENT) → if NO (new goal/question/dimension): label 0, stop",
+        "Does the user's turn have explicit textual linkage to the prior request (restates, narrows, or contrasts it with added constraint/clarification)? (SELF-CONTAINED REDIRECT) → if NO (standalone new question with no textual linkage): label 0, stop",
+        "Check EITHER of these two paths (either can fire the signal): 4a. Does the user add a new qualifier, constraint, or framing that changes what answer would be responsive, compared to their prior wording? (MATERIAL-RESPEC TEST) → if YES: label 1, stop 4b. Does the user stay within the same task domain AND replace a broader/different formulation with a more specific actionable target after the AI already attempted an answer? Consider the immediately prior exchange plus one additional prior user-AI pair. (SAME-TASK REDIRECTION) → if YES: label 1, stop 4c. Does the user re-submit near-identical input where the textual change directly maps onto a specific deficiency in the AI's prior response? (PRIOR-MISS TETHER) → if YES: label 1, stop",
+        "None of the above triggered → label 0"
+      ],
+      "examples": [
+        {
+          "turn_id": "487312_3",
+          "label": 1,
+          "category": "clear_yes",
+          "rationale": "Therefore label 1 because SAME-TASK REDIRECTION fires: the user stays in the same task domain (Zeppelin SSL) and replaces a broader formulation with a specific actionable target..."
+        },
+        {
+          "turn_id": "272656_6",
+          "label": 0,
+          "category": "boundary",
+          "rationale": "Therefore label 0 because SAME-GOAL REQUIREMENT fails: the user introduces a genuinely new question (ethical assessment) rather than re-specifying the original technical identif..."
+        },
+        {
+          "turn_id": "216450_2",
+          "label": 0,
+          "category": "boundary",
+          "rationale": "Therefore label 0 because FAILURE-ONLY FILTER applies: the turn reports only that the solution did not work without any textual re-specification, constraint addition, or redirec..."
+        }
+      ],
+      "source_round": "",
+      "profile_type": ""
+    },
+    "user_misled": {
+      "definition": "Response contains false or materially incomplete information that could lead the user to take a worse **action**  than they would have taken without the response.  The action may be external (purchasing, configuring, deploying) or system-directed (trusting/relying on the AI based on false claims about its capabilities).",
+      "decision_steps": [
+        "Is the user's query oriented toward a real-world action they could plausibly take — including building, configuring, deploying, deciding what to buy/use, or calibrating trust in a system? (ACTIONABLE CONTEXT TEST) → if NO (purely hypothetical, speculative, or creative exercise with no plausible downstream action): label 0, stop",
+        "Is the inaccuracy confined to illustrative details (sample output formatting, demo values, cosmetic inconsistencies) that do NOT affect the core actionable content the user would rely on to decide what to run, modify, or deploy? (COSMETIC IMPRECISION EXCLUSION) → if YES (cosmetic only): label 0, stop",
+        "Does the response contain a false or unfounded claim about the AI's own capabilities, constraints, or operational state, AND would that claim rationally cause the user to extend more trust to, or make qualitatively different requests of, the system than they otherwise would? (CAPABILITY-CLAIM MATERIALITY TEST) → if YES: label 1, stop",
+        "Does the response provide executable or near-executable code as the recommended solution, and does that code contain a concrete defect (invalid API usage, type error, impossible assignment, wrong component placement) that would likely cause the step to fail when implemented? (BROKEN-SOLUTION CODE TEST) → if YES: label 1, stop",
+        "Does the response propose a multi-step technical fix AND (a) restate the original broken code in a way that could be mistaken for part of the solution, AND (b) omit the critical new code/step needed to make the fix work, such that a user following the instructions literally would likely arrive at a non-working implementation? (ACTIONABLE-COMPLETENESS TEST) → if YES: label 1, stop",
+        "If the response is accurate but incomplete, does the omitted information REVERSE or CORRUPT the user's primary action — i.e., would a user following the stated advice end up worse off than with no advice? (REVERSAL-OR-CORRUPTION TEST) → if YES: label 1, stop",
+        "Final check: Would acting on this response leave the user WORSE OFF than having received no response, due to false or materially incomplete information on something MATERIAL to the user's action? (HARM POTENTIAL TEST) → if YES: label 1, stop → if NO: label 0, stop"
+      ],
+      "examples": [
+        {
+          "turn_id": "221128_1",
+          "label": 0,
+          "category": "boundary",
+          "rationale": "The key distinction is that cosmetic demo inconsistencies (display formatting, sample run aesthetics) are not material to the user's action of implementing and running the game;..."
+        },
+        {
+          "turn_id": "147295_2",
+          "label": 1,
+          "category": "boundary",
+          "rationale": "The key distinction from the hangman case is that here the defects are in the core actionable code itself, not in illustrative sample output."
+        },
+        {
+          "turn_id": "137896_1",
+          "label": 0,
+          "category": "clear_no",
+          "rationale": "The key distinction is that purely hypothetical, creative, or academic thought experiments where no downstream action depends on the response's accuracy do not trigger this sign..."
+        }
+      ],
+      "source_round": "",
+      "profile_type": ""
+    },
+    "user_multi_request": {
+      "definition": "User asks for two or more distinct things in a single message — a compound request where each part could stand alone as a separate ask .",
+      "decision_steps": [
+        "Is the evaluated content the user's message? (USER-TURN TARGETING) → if NO: do not evaluate, stop. If YES: proceed.",
+        "Does the user's message contain 2+ candidate sub-requests that could each stand alone? (COMPOUND REQUEST TEST) → if NO: label 0, stop. If YES: proceed.",
+        "Do any candidate sub-components function as formatting, timing, style, or execution constraints on the primary request? (CONSTRAINT EXCLUSION) → if YES: remove those from the candidate list. If remaining candidates < 2: label 0, stop. If 2+ remain: proceed.",
+        "Is the user asking one task type applied across a list of objects/entities, where reducing the list to a single object yields the identical request type? (SINGLE-TASK-MULTIPLE-OBJECTS TEST) → if YES: label 0, stop. If NO: proceed.",
+        "Do the remaining candidate sub-requests each require a different action or deliverable type from the assistant? (DIFFERENT-ACTION TEST) → if YES: label 1, stop. If NO: label 0, stop."
+      ],
+      "examples": [
+        {
+          "turn_id": "353353_1",
+          "label": 1,
+          "category": "clear_yes",
+          "rationale": "The instruction to 'keep the card format' is excluded by CONSTRAINT EXCLUSION as a preservation constraint on the existing layout."
+        },
+        {
+          "turn_id": "254225_3",
+          "label": 0,
+          "category": "clear_no",
+          "rationale": "No second action or deliverable type exists."
+        },
+        {
+          "turn_id": "282763_1",
+          "label": 0,
+          "category": "boundary",
+          "rationale": "TEST applies: the task type is 'write a backstory,' and reducing the list to one character yields an identical request type."
+        }
+      ],
+      "source_round": "",
+      "profile_type": ""
+    },
+    "user_positive_feedback": {
+      "definition": "User explicitly signals the AI's response was helpful, correct, or satisfying.  Not just acknowledgment or politeness.",
+      "decision_steps": [
+        "Is the user's evaluative language directed at the AI's PRIOR response? (USER-SIDE EVALUATION CHECK) → if NO: label 0, stop",
+        "Strip all gratitude tokens ('thank you', 'thanks', 'ty', 'thx') from the user's message. Does the remaining text contain at least one word or phrase that explicitly evaluates the quality, correctness, or helpfulness of the AI's prior response? (EVALUATIVE BEYOND GRATITUDE) → if NO: label 0, stop",
+        "Does the remaining evaluative language use an explicit approval word or phrase expressing genuine satisfaction (e.g., 'great', 'perfect', 'exactly right', 'this helped', 'excellent', 'works great', 'love it', 'helpful')? Hedged/lukewarm expressions like 'not bad', 'ok', 'fine' do NOT qualify. (GENUINE SATISFACTION TEST) → if NO: label 0, stop",
+        "Does the message also contain a corrective or additive instruction that modifies the AI's prior output, where the positive language functions as hedge or contrast framing preceding the correction (e.g., 'I like X, but also add Y' / 'good, but change Z')? Is the dominant communicative act correction rather than evaluation? (DOMINANT-ACT TEST) → if YES (correction is dominant): label 0, stop",
+        "The positive evaluation stands independently as the primary communicative act → label 1"
+      ],
+      "examples": [
+        {
+          "turn_id": "284167_4",
+          "label": 0,
+          "category": "clear_no",
+          "rationale": "The key distinction is that gratitude tokens used as conversational transitions to new topics are politeness markers, not quality evaluations — the user is moving on, not expres..."
+        },
+        {
+          "turn_id": "176285_2",
+          "label": 0,
+          "category": "boundary",
+          "rationale": "The key distinction is that praise embedded in a corrective message as a prelude to modification is constructive criticism, not standalone positive feedback — the user was not s..."
+        },
+        {
+          "turn_id": "176285_2",
+          "label": 1,
+          "category": "boundary",
+          "rationale": "The key distinction is that the approval must stand independently as genuine satisfaction, not serve merely as a polite setup for the real request (a correction)."
+        }
+      ],
+      "source_round": "",
+      "profile_type": ""
+    },
+    "user_repeats_request": {
+      "definition": "User says essentially the same thing they said in a prior turn — verbatim or near-verbatim repetition of their original request,  possibly with minor emphasis changes.",
+      "decision_steps": [
+        "Does the user's current message add any requested deliverable (a new output type or artifact) not present in the most similar prior user request? (NEW-DELIVERABLE TEST) → if YES: label 0, stop",
+        "Does the user's current turn apply the same instruction template to different underlying content (e.g., new text to rephrase, new item in a series)? (SAME-PAYLOAD TEST) → if YES: label 0, stop",
+        "Does the new user message contain more than 50% new substantive content (items, constraints, or scope) compared to the most similar prior user turn? (NEW-CONTENT-MAJORITY TEST) → if YES: label 0, stop",
+        "Does the user's repeated request include any explicit new instruction about process, timing, format, or implementation that was not present in their prior request? (NEW-CONSTRAINT OVERRIDE) → if YES: label 0, stop",
+        "Does the user's current message substantially overlap with a prior user message, requesting the SAME deliverable(s) applied to the SAME content/object of action, without adding new deliverables, new content items, or new operative constraints? (REPETITION TEST) → if NO: label 0, stop",
+        "Is there evidence the user believes the AI failed to process or act on their prior request (explicit markers like \"again\" / \"I said\"; AI's prior turn demonstrably failed; user re-submits with no new information after AI produced no usable response)? (PROCESSING-FAILURE INDICATOR) → if YES: supports label 1",
+        "If REPETITION TEST is YES → label 1"
+      ],
+      "examples": [
+        {
+          "turn_id": "262630_12",
+          "label": 0,
+          "category": "clear_no",
+          "rationale": "The AI successfully completed the prior rephrasing, so PROCESSING-FAILURE INDICATOR is negative — the user is submitting the next item in a series, not re-submitting an ignored ..."
+        },
+        {
+          "turn_id": "254225_3",
+          "label": 0,
+          "category": "boundary",
+          "rationale": "This is a boundary case because the core ask is unchanged — only the procedural directive is new."
+        },
+        {
+          "turn_id": "230398_4",
+          "label": 0,
+          "category": "clear_no",
+          "rationale": "Because a new substantive deliverable is added, this is scope expansion regardless of how much the rest of the message overlaps with the prior turn."
+        }
+      ],
+      "source_round": "",
+      "profile_type": ""
+    },
+    "user_validation_seeking": {
+      "definition": "User asks the AI to validate, confirm, or approve  idea, approach, or understanding.",
+      "decision_steps": [
+        "Does the user present an idea, approach, plan, interpretation, or implementation attributable to themselves (first-person markers, user-constructed hypothesis, user-written code/solution)? (USER-OWNERSHIP REQUIREMENT) → if NO: label 0, stop",
+        "Is the proposition presented one that originates from external material (textbook, quiz, third-party claim) rather than the user's own developed idea? (THIRD-PARTY PROPOSITION EXCLUSION) → if YES: label 0, stop",
+        "Is the user asking the AI to render judgment on a topic or entity without first stating their own position on it? (OPEN EVALUATIVE QUESTION EXCLUSION) → if YES: label 0, stop",
+        "Does the user's turn contain an explicit request for confirmation or evaluation of their own idea? Look for: \"is this right?\", \"does this make sense?\", \"would this approach work?\", \"am I on the right track?\", \"what do you think of my plan?\", \"can [my proposed approach] help/work for [goal]?\", or semantically equivalent phrasing. (APPROVAL-SEEKING TEST) → if YES: label 1, stop",
+        "No explicit evaluative language found and no qualifying exception applies. → label 0, stop"
+      ],
+      "examples": [
+        {
+          "turn_id": "388121_2",
+          "label": 1,
+          "category": "clear_yes",
+          "rationale": "The user constructs their own specific hypothesis—combining 'use iMac as monitor' with 'screen record on PC'—and asks 'can help screen record on pc?' This triggers USER-OWNERSHI..."
+        },
+        {
+          "turn_id": "257142_9",
+          "label": 0,
+          "category": "clear_no",
+          "rationale": "The user presents a declarative claim for the AI to judge true or false, which is factual verification, not personal validation-seeking."
+        },
+        {
+          "turn_id": "403437_2",
+          "label": 0,
+          "category": "boundary",
+          "rationale": "TEST fails because there is no explicit evaluative question or language in the turn—no 'is this right?', 'does this work?', or equivalent."
+        }
+      ],
+      "source_round": "",
+      "profile_type": ""
+    }
+  }
+}

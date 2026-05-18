@@ -1,0 +1,1273 @@
+{
+  "name": "Failure Analysis Taxonomy \u2014 Calibration Ready",
+  "version": "3.0",
+  "description": "Full taxonomy for round 3 calibration. 65 signals total (49 Tier 1 downstream-ready + 16 Tier 2 calibration candidates). Tier 2 signals have tier=2 flag \u2014 included for calibration but not yet reliable for downstream analysis. Based on v1.1 + generate_without_clarifying, minus user_passive_acceptance.",
+  "tagging_unit": "single AI response (with full conversation context) + preceding user turn",
+  "tagging_approach": "Per-turn: the tagger sees the full transcript but tags ONE turn at a time. For each AI response, tag which signals are present. User-behavior signals are tagged on the USER turn that precedes the AI response.",
+  "layer1_signals": {
+    "ai_asked_clarifying_question": {
+      "category": "information_gathering",
+      "description": "AI explicitly asks the user a question to disambiguate their request or gather missing information. Must be a genuine question seeking information, not a generic greeting.",
+      "boundary_notes": "INFORMATION-SEEKING TEST: Two forms count: (1) Direct question: 'Which version are you using?' (2) Conditional request: 'If you tell me X, I can Y'. The model must need information to proceed. Generic 'how can I help?' on a clear message does NOT count.",
+      "counts": [
+        "Direct disambiguation: 'What specifically are you looking for?'",
+        "Gathering missing info: 'What's your role and review period?'",
+        "Conditional request: 'If you tell me X, I can adjust'"
+      ],
+      "does_not_count": [
+        "'How can I assist you today?' as generic greeting",
+        "Rhetorical questions",
+        "'Would you like me to explain further?' (that's offers_to_elaborate)"
+      ]
+    },
+    "ai_offered_options": {
+      "category": "information_gathering",
+      "description": "AI presents 2+ distinct enumerated approaches for the user to choose between.",
+      "boundary_notes": "CHOICE-POINT TEST: Must present at least two distinct choices the user is asked to pick from. Options can be inline with 'or'. Mentioning that options exist without presenting them does not count.",
+      "counts": [
+        "'You could do A, or alternatively B'",
+        "'Option 1:... Option 2:...'",
+        "'Which do you prefer? 1) Chat 2) Callback'"
+      ],
+      "does_not_count": [
+        "'There are several ways' without enumerating",
+        "A list of similar items (10 restaurants)",
+        "Steps in one approach"
+      ]
+    },
+    "ai_hedges_uncertainty": {
+      "category": "confidence_calibration",
+      "description": "AI uses language that downgrades the confidence of a factual or analytical claim it is making.",
+      "boundary_notes": "The test: is the model MAKING ITS OWN CLAIM and downgrading confidence? 'I believe', 'I'm not sure', 'appears to', 'seems to' on own claims count. Does NOT count: polite suggestion framing ('you might want to'), real-world variability, reporting others' predictions, character/roleplay voice, conditional instructions.",
+      "counts": [
+        "'I'm not entirely sure, but...'",
+        "'I believe the deadline is March 15th'",
+        "'This seems to be a known issue'"
+      ],
+      "does_not_count": [
+        "'You might want to...' (polite suggestion)",
+        "'The market is expected to reach...' (reporting others)",
+        "Creative writing hedging"
+      ]
+    },
+    "ai_asserts_knowledge_limit": {
+      "category": "confidence_calibration",
+      "description": "AI explicitly states the boundaries of what IT knows, can access, or can do.",
+      "boundary_notes": "Must assert limits about ITSELF, not about the world being complicated. 'I don't have access to...' vs 'This is a nuanced area' (the latter is flags_complexity).",
+      "counts": [
+        "'I don't have access to...'",
+        "'My training data only goes up to...'",
+        "'I can't verify this in real-time'"
+      ],
+      "does_not_count": [
+        "Describing a topic as complex",
+        "'This is a nuanced area'"
+      ]
+    },
+    "ai_cites_source": {
+      "category": "confidence_calibration",
+      "description": "AI references a specific external source to support a claim \u2014 a document, URL, study, or named authority.",
+      "boundary_notes": "Must reference a specific, identifiable source. 'Studies show' without specifics does NOT count.",
+      "counts": [
+        "'According to the MDN documentation...'",
+        "'Research by Smith et al. found...'",
+        "Includes a specific URL"
+      ],
+      "does_not_count": [
+        "'Studies show' without naming the study",
+        "'Experts say' without specifics"
+      ]
+    },
+    "ai_flags_complexity": {
+      "category": "confidence_calibration",
+      "description": "AI explicitly states that a topic/question/situation is complex, nuanced, or depends on multiple factors.",
+      "boundary_notes": "VOCABULARY TEST: Must contain complexity words: 'complex', 'nuanced', 'not straightforward', 'depends on several factors'. Ambiguity in the question \u2260 complexity of the topic. Emotional difficulty \u2260 complexity.",
+      "counts": [
+        "'This is a complex topic with many variables'",
+        "'The answer depends on several factors'",
+        "'It's not straightforward because...'"
+      ],
+      "does_not_count": [
+        "Thorough answer (thoroughness \u2260 flagging complexity)",
+        "Praising the question's depth",
+        "'It depends on [single variable]'"
+      ]
+    },
+    "ai_validates_user": {
+      "category": "validation_rapport",
+      "description": "AI affirms something specific about the user's feelings, approach, or reasoning. Must be substantive, not a compliance opener.",
+      "boundary_notes": "SPECIFICITY+VOICE TEST: Must affirm something SPECIFIC and be the AI speaking as itself. 'Great question!' is a compliance opener, NOT validation.",
+      "counts": [
+        "'That's a great approach to this problem'",
+        "'Your instinct to check X first is exactly right'",
+        "'Completely understandable to feel that way'"
+      ],
+      "does_not_count": [
+        "'Certainly!' or 'Sure!'",
+        "'Great question!'",
+        "'Thank you for sharing'"
+      ]
+    },
+    "ai_empathy_expressed": {
+      "category": "validation_rapport",
+      "description": "AI, speaking as itself directly to the user, expresses understanding of the user's emotional state or situation.",
+      "boundary_notes": "SPEAKER IDENTITY TEST: Must be AI speaking AS ITSELF TO THE USER. Empathy in deliverables (blog posts, creative writing) or character dialogue does NOT count.",
+      "counts": [
+        "'I understand how frustrating that must be'",
+        "'That sounds really stressful'",
+        "'I'm sorry you're dealing with this'"
+      ],
+      "does_not_count": [
+        "'I apologize for the confusion' (apology, not empathy)",
+        "Empathy in blog post voice",
+        "Character dialogue empathy"
+      ]
+    },
+    "ai_references_prior_turn": {
+      "category": "context_tracking",
+      "description": "AI explicitly references information from an earlier turn (not the most recent user message).",
+      "boundary_notes": "EXPLICIT CALLBACK TEST: Must be multi-turn AND contain explicit marker: temporal language ('as mentioned earlier'), cross-reference ('the previous response'), quote from prior turn, or revision framing ('here is the updated version').",
+      "counts": [
+        "'As I mentioned earlier...'",
+        "'Building on what we discussed about X...'",
+        "'Here is your background rewritten with citations'"
+      ],
+      "does_not_count": [
+        "Continuing same topic without explicit callback",
+        "Single-turn conversation",
+        "Silently using prior context"
+      ]
+    },
+    "ai_acknowledges_correction": {
+      "category": "context_tracking",
+      "description": "AI explicitly acknowledges that the user corrected it \u2014 admits the error and adjusts.",
+      "boundary_notes": "Only applicable when user has corrected the AI in a prior turn. Must explicitly acknowledge the mistake, not just give a different answer.",
+      "counts": [
+        "'You're right, I was wrong about...'",
+        "'Good catch \u2014 let me correct that...'",
+        "'Thanks for the correction...'"
+      ],
+      "does_not_count": [
+        "Single-turn (no correction possible)",
+        "Giving different answer without acknowledging error"
+      ]
+    },
+    "ai_structured_response": {
+      "category": "response_structure",
+      "description": "AI organizes response using visible structural elements \u2014 headers, numbered lists (3+), bullets (3+), code blocks, tables.",
+      "boundary_notes": "Must use actual visible formatting elements. Well-organized paragraph text without formatting markers is NOT structured.",
+      "counts": [
+        "Headers with content under them",
+        "Bullet/numbered lists of 3+ items",
+        "Code blocks, tables"
+      ],
+      "does_not_count": [
+        "Single bold phrase",
+        "Two-item list",
+        "Well-organized paragraphs without formatting"
+      ]
+    },
+    "ai_provides_example": {
+      "category": "response_structure",
+      "description": "AI illustrates a general point with a concrete instance DISTINCT from the main deliverable.",
+      "boundary_notes": "ILLUSTRATION TEST: Must follow general\u2192specific pattern or use signal phrase ('for example'). If user asked for X and model produced X, that's a deliverable, not an example.",
+      "counts": [
+        "'For example, if you have a list of users...'",
+        "'Consider this scenario:...'",
+        "Code sample illustrating a concept"
+      ],
+      "does_not_count": [
+        "The main deliverable itself",
+        "Diagnostic/troubleshooting prompts",
+        "Enumeration of items"
+      ]
+    },
+    "ai_provides_step_by_step": {
+      "category": "response_structure",
+      "description": "AI breaks a process into sequential, ordered steps. Must present 3+ steps in a clear sequence.",
+      "boundary_notes": "Steps must be SEQUENTIAL (order matters). A list of independent tips is NOT step-by-step. Must have 3+ steps.",
+      "counts": [
+        "'Step 1:... Step 2:... Step 3:...'",
+        "Numbered sequential instructions",
+        "Process walkthrough with clear ordering"
+      ],
+      "does_not_count": [
+        "Unordered list of tips",
+        "Two-step instruction",
+        "Bullet points that aren't sequential"
+      ]
+    },
+    "ai_provides_caveats": {
+      "category": "response_structure",
+      "description": "AI qualifies its recommendation with conditions, limitations, or edge cases.",
+      "boundary_notes": "CAVEAT vs INSTRUCTION TEST: Must have (1) a recommendation, (2) text qualifying it, (3) caveat-framing language ('note that', 'keep in mind', 'only works if'). Prerequisites and troubleshooting branches don't count.",
+      "counts": [
+        "'Note that this only works on Python 3.8+'",
+        "'Keep in mind that this approach has performance implications at scale'",
+        "'Assuming you're using the latest version...'"
+      ],
+      "does_not_count": [
+        "Prerequisites for setup",
+        "Troubleshooting branches",
+        "Factual consequences without recommendation"
+      ]
+    },
+    "ai_warns_user": {
+      "category": "response_structure",
+      "description": "AI identifies a specific negative outcome or risk the user should be aware of.",
+      "boundary_notes": "RISK IDENTIFICATION TEST: Must identify a SPECIFIC negative outcome. Generic safety advice ('be careful') doesn't count.",
+      "counts": [
+        "'Warning: this will delete all data in the table'",
+        "'Be aware that this approach has a known security vulnerability'",
+        "'This could cause data loss if interrupted'"
+      ],
+      "does_not_count": [
+        "'Be careful' without specifics",
+        "'Consider security best practices'",
+        "General disclaimers"
+      ]
+    },
+    "ai_refuses_or_declines": {
+      "category": "response_structure",
+      "description": "AI explicitly declines to do something the user requested, stating it cannot or will not.",
+      "boundary_notes": "Must be an explicit refusal or decline. Offering an alternative without explicitly declining doesn't count unless the refusal is stated.",
+      "counts": [
+        "'I'm not able to help with that'",
+        "'I can't provide medical advice'",
+        "'That's outside what I can do'"
+      ],
+      "does_not_count": [
+        "Redirecting without explicit refusal",
+        "Providing partial help without mentioning what was declined"
+      ]
+    },
+    "ai_asked_probing_question": {
+      "category": "information_gathering",
+      "description": "AI asks a question inviting reflection or deeper exploration, not just disambiguation. Opens up the conversation rather than narrowing it.",
+      "boundary_notes": "Probing questions go beyond what's needed to answer \u2014 they push the user to think. If the AI could answer without the question, it's probing, not clarifying.",
+      "counts": [
+        "'What would that look like for you?'",
+        "'Have you considered...?'",
+        "'What's driving that decision?'"
+      ],
+      "does_not_count": [
+        "Questions needed to answer the user's query (that's clarifying)",
+        "Follow-up questions on specifics"
+      ],
+      "tier": 2,
+      "tier_note": "Not yet reliable for downstream analysis. Included for calibration improvement.",
+      "r3_kappa": 0.332
+    },
+    "ai_asks_for_feedback": {
+      "category": "response_structure",
+      "description": "AI explicitly asks the user to evaluate or rate the response it just gave.",
+      "boundary_notes": "EVALUATION REQUEST TEST: Must seek response evaluation. Closers ('anything else?') and troubleshooting follow-ups don't count.",
+      "counts": [
+        "'Does this answer your question?'",
+        "'Is this what you were looking for?'",
+        "'How does this look?'"
+      ],
+      "does_not_count": [
+        "'Anything else I can help with?'",
+        "'Let me know if it works'",
+        "Troubleshooting follow-ups"
+      ],
+      "tier": 2,
+      "tier_note": "Not yet reliable for downstream analysis. Included for calibration improvement.",
+      "r3_kappa": 0.311
+    },
+    "ai_normalizes_difficulty": {
+      "category": "validation_rapport",
+      "description": "AI explicitly states that a difficulty is common, universal, or shared. Frames difficulty as expected rather than a user failing.",
+      "boundary_notes": "UNIVERSALIZING TEST: Must state difficulty is COMMON/UNIVERSAL/SHARED. 'Many people struggle with...' counts. 'It can be challenging' alone does NOT (doesn't universalize).",
+      "counts": [
+        "'This is a common source of confusion'",
+        "'Many people struggle with this'",
+        "'You're not alone in feeling this way'"
+      ],
+      "does_not_count": [
+        "'It's okay to feel X' (validates but doesn't universalize)",
+        "'It can be challenging' without saying it's common"
+      ],
+      "tier": 2,
+      "tier_note": "Not yet reliable for downstream analysis. Included for calibration improvement.",
+      "r3_kappa": 0.289
+    },
+    "ai_offers_to_elaborate": {
+      "category": "response_structure",
+      "description": "AI explicitly offers to provide more detail, explanation, or related content.",
+      "boundary_notes": "DEPTH-OFFER TEST: Must offer deeper content on THIS topic. Closing pleasantries ('Let me know if you need anything else') and usage instructions don't count.",
+      "counts": [
+        "'Would you like me to go into more detail about X?'",
+        "'I can elaborate on the authentication part if helpful'",
+        "'Let me know if you'd like a deeper dive into...'"
+      ],
+      "does_not_count": [
+        "'Let me know if you need anything else' (generic closer)",
+        "Usage instructions",
+        "Offering to help with unrelated topics"
+      ],
+      "tier": 2,
+      "tier_note": "Not yet reliable for downstream analysis. Included for calibration improvement.",
+      "r3_kappa": 0.29
+    },
+    "ai_provides_alternatives": {
+      "category": "response_structure",
+      "description": "AI presents multiple ways to accomplish the same goal. Must be genuine alternative approaches the user could choose between.",
+      "boundary_notes": "CHOICE-POINT TEST: User must be expected to PICK ONE approach. Sequential fixes to try, capability lists, and enumerated items to apply ALL don't count.",
+      "counts": [
+        "'Method 1: using X... Method 2: using Y...'",
+        "'Alternatively, you could...'",
+        "Multiple distinct approaches to the same problem"
+      ],
+      "does_not_count": [
+        "Capability lists",
+        "Sequential troubleshooting steps",
+        "Items user should apply all of"
+      ],
+      "tier": 2,
+      "tier_note": "Not yet reliable for downstream analysis. Included for calibration improvement.",
+      "r3_kappa": 0.302
+    },
+    "ai_references_user_words": {
+      "category": "context_tracking",
+      "description": "AI quotes, attributes, or adopts specific language from the user. Requires attribution, quotation marks, or a distinctive multi-word phrase.",
+      "boundary_notes": "MECHANICAL TEST: One of three structures required: (1) Attribution phrase ('you mentioned'). (2) Quotation marks around user language. (3) Non-standard multi-word phrase (3+ words) from user adopted verbatim. Domain-standard terms don't count.",
+      "counts": [
+        "'You mentioned \"budget constraints\"...'",
+        "'The \"boxes\" you're referring to are called gondolas'",
+        "Adopting user's distinctive multi-word phrase"
+      ],
+      "does_not_count": [
+        "Same topic words without attribution",
+        "Proper nouns/variable names from user's code",
+        "Domain jargon"
+      ],
+      "tier": 2,
+      "tier_note": "Not yet reliable for downstream analysis. Included for calibration improvement.",
+      "r3_kappa": 0.272
+    },
+    "ai_stated_interpretation": {
+      "category": "information_gathering",
+      "description": "AI declares how it reads the user's request before/while responding, making its interpretation visible.",
+      "boundary_notes": "DIAGNOSIS/TRANSLATION TEST: Three forms: (1) Explicit meta-statement: 'I understand your question as...'. (2) Diagnostic reframing into technical/domain framework. (3) Conditional interpretation: 'If you mean X... If you mean Y...' Does NOT count: simply answering without making interpretation visible, generic intros.",
+      "counts": [
+        "'If I understand correctly, you want...'",
+        "'This error indicates that...' (diagnostic)",
+        "'I'll focus on the Python implementation specifically' (scope choice)"
+      ],
+      "does_not_count": [
+        "Jumping straight into answer without restatement",
+        "'Here's a comprehensive guide'",
+        "Verbatim restatement without narrowing"
+      ],
+      "tier": 2,
+      "tier_note": "Not yet reliable for downstream analysis. Included for calibration improvement.",
+      "r3_kappa": 0.177
+    },
+    "ai_summarizes": {
+      "category": "response_structure",
+      "description": "AI compresses prior content into a shorter form.",
+      "boundary_notes": "COMPRESSION TEST: Must compress PRIOR content into shorter form. Changelogs, method outlines, and standalone conclusions don't count.",
+      "counts": [
+        "'To summarize:...'",
+        "'In short,...'",
+        "Condensing a long discussion into key points"
+      ],
+      "does_not_count": [
+        "Method outlines",
+        "Standalone conclusions without prior content to compress",
+        "Changelogs"
+      ],
+      "tier": 2,
+      "tier_note": "Not yet reliable for downstream analysis. Included for calibration improvement.",
+      "r3_kappa": 0.295
+    }
+  },
+  "layer2_signals": {
+    "silent_assumption": {
+      "category": "information_handling",
+      "valence": "negative",
+      "description": "AI proceeds based on an interpretation of an ambiguous request without surfacing the assumption.",
+      "structural_gate": "AMBIGUITY GATE: User's message must contain genuine ambiguity with 2+ plausible interpretations. If only one reasonable reading, CANNOT fire.",
+      "boundary_notes": "ASSUMPTION VISIBILITY TEST: Check for ANY language acknowledging the choice: 'I'm assuming', 'interpreting this as', 'if you mean', conditional framing. If ANY present, does NOT fire.",
+      "counts": [
+        "User says 'fix the database' \u2014 AI rewrites PostgreSQL without asking which DB",
+        "User says 'make it faster' \u2014 AI optimizes only backend without noting the choice"
+      ],
+      "does_not_count": [
+        "Only one reasonable interpretation",
+        "AI says 'I'll assume you mean...'",
+        "Prior context makes intent clear"
+      ]
+    },
+    "false_confidence": {
+      "category": "information_handling",
+      "valence": "negative",
+      "description": "AI presents uncertain, unverified, or incorrect information with unwarranted certainty.",
+      "structural_gate": "FACTUAL CLAIM GATE: Must contain at least one factual claim that could be verified true/false. Pure opinions, creative content, code don't qualify.",
+      "boundary_notes": "CALIBRATION TEST: Language must not match reliability. Certainty markers on uncertain/wrong claims. Well-established facts stated confidently are appropriate, not false confidence.",
+      "counts": [
+        "Wrong date/statistic stated without hedging",
+        "'This will definitely fix the issue' for one of several possible causes"
+      ],
+      "does_not_count": [
+        "Confident well-established facts",
+        "Creative writing",
+        "Code with potential bugs"
+      ]
+    },
+    "appropriate_hedge": {
+      "category": "information_handling",
+      "valence": "positive",
+      "description": "AI expresses uncertainty proportionate to actual ambiguity or knowledge limits.",
+      "structural_gate": "HEDGE PRESENCE GATE: Must contain explicit hedging language. No hedge \u2192 CANNOT fire.",
+      "boundary_notes": "PROPORTIONALITY TEST: Is the hedged claim GENUINELY UNCERTAIN? Hedge must modify something where uncertainty is real.",
+      "counts": [
+        "'This might be a version compatibility issue' \u2014 plausible but unverified",
+        "'I'm not entirely sure about the exact syntax'"
+      ],
+      "does_not_count": [
+        "'I think Python uses indentation' \u2014 hedging well-established fact (that's performative_hedge)"
+      ]
+    },
+    "performative_hedge": {
+      "category": "information_handling",
+      "valence": "negative",
+      "description": "AI adds boilerplate uncertainty language that doesn't correspond to actual uncertainty.",
+      "structural_gate": "HEDGE PRESENCE GATE: Must contain explicit hedging language.",
+      "boundary_notes": "EMPTY HEDGE TEST: Is the hedged claim ACTUALLY UNCERTAIN? If well-established or easily verifiable, the hedge is performative.",
+      "counts": [
+        "'I think Python is a programming language'",
+        "'If I'm not mistaken, HTTP uses port 80'",
+        "Blanket hedging on every statement"
+      ],
+      "does_not_count": [
+        "Hedging genuinely uncertain claims",
+        "Standard academic register"
+      ]
+    },
+    "adaptation": {
+      "category": "responsiveness",
+      "valence": "positive",
+      "description": "AI changes its approach in response to conversation signals \u2014 corrections, failed attempts, new info.",
+      "structural_gate": "MULTI-TURN GATE: Must be multi-turn with something in prior turns that calls for adjustment.",
+      "boundary_notes": "APPROACH CHANGE TEST: Must demonstrate DIFFERENT approach from before. Simply continuing same approach with minor variations is NOT adaptation.",
+      "counts": [
+        "User said 'too complicated' \u2014 AI responds with simplified version",
+        "Prior code failed \u2014 AI tries fundamentally different approach"
+      ],
+      "does_not_count": [
+        "First-turn response",
+        "Same approach with superficial changes"
+      ]
+    },
+    "repetition": {
+      "category": "responsiveness",
+      "valence": "negative",
+      "description": "AI repeats the same approach despite signals it didn't work.",
+      "structural_gate": "MULTI-TURN + FAILURE GATE: (1) Multi-turn, (2) evidence prior approach DIDN'T WORK.",
+      "boundary_notes": "SAME-STRATEGY TEST: Could you swap the responses and get same outcome? If yes \u2192 repetition.",
+      "counts": [
+        "User said 'that didn't work' \u2014 AI provides same code with minor changes",
+        "Prior suggestion rejected \u2014 AI re-suggests with different framing"
+      ],
+      "does_not_count": [
+        "First-turn",
+        "User asked for re-explanation",
+        "Different approach that also fails"
+      ]
+    },
+    "plow_through": {
+      "category": "responsiveness",
+      "valence": "negative",
+      "description": "AI continues without reference to relevant prior context. Ignores corrections, clarifications, or shifted requirements.",
+      "structural_gate": "MULTI-TURN + RELEVANT CONTEXT GATE: Prior turns must contain info that SHOULD influence current response.",
+      "boundary_notes": "CONTEXT BLINDNESS TEST: Different from repetition. Repetition = same failed approach. Plow_through = relevant context IGNORED entirely.",
+      "counts": [
+        "User specified 'Python 2' \u2014 AI provides Python 3 syntax",
+        "User corrected 'frontend not backend' \u2014 AI continues on backend"
+      ],
+      "does_not_count": [
+        "First-turn",
+        "AI references context but disagrees",
+        "Prior context not relevant"
+      ]
+    },
+    "under_delivered": {
+      "category": "scope",
+      "valence": "negative",
+      "description": "Response is noticeably less complete than the request warranted.",
+      "structural_gate": "REQUEST COMPLEXITY GATE: Request must warrant more than provided.",
+      "boundary_notes": "MISSING SUBSTANCE TEST: Check for unanswered parts, missing key info, surface-level answer where depth needed.",
+      "counts": [
+        "Multi-part question with one part ignored",
+        "Working implementation requested, pseudocode provided"
+      ],
+      "does_not_count": [
+        "Concise answer to simple question",
+        "AI acknowledges limitation transparently"
+      ]
+    },
+    "off_topic_drift": {
+      "category": "scope",
+      "valence": "negative",
+      "description": "Part or all of the response addresses something other than what the user asked.",
+      "structural_gate": "TOPIC DIVERGENCE GATE: Must contain substantial content addressing a DIFFERENT topic.",
+      "boundary_notes": "RELEVANCE CHAIN TEST: Can you trace clear logical chain from user's question to each section? Multiple inferential leaps = drift.",
+      "counts": [
+        "User asks about sorting \u2014 AI discusses Python history first",
+        "User asks about CSS bug \u2014 AI lectures about switching frameworks"
+      ],
+      "does_not_count": [
+        "Necessary background",
+        "Closely related sub-topic",
+        "Minor tangential notes"
+      ]
+    },
+    "error_recovery": {
+      "category": "error_handling",
+      "valence": "positive",
+      "description": "AI identifies an error in its own prior output and corrects it.",
+      "structural_gate": "MULTI-TURN + PRIOR ERROR GATE: Must be multi-turn with verifiable prior error that current response addresses.",
+      "boundary_notes": "SELF-CORRECTION TEST: Must both identify error and provide correct information.",
+      "counts": [
+        "'Actually, I made an error \u2014 method X is deprecated, use Y'",
+        "Catches own mistake: 'wait, that's not right'"
+      ],
+      "does_not_count": [
+        "First-turn",
+        "New answer also wrong",
+        "Elaboration \u2260 recovery"
+      ]
+    },
+    "error_commitment": {
+      "category": "error_handling",
+      "valence": "negative",
+      "description": "After error is identified, AI doubles down rather than correcting.",
+      "structural_gate": "MULTI-TURN + ERROR FLAGGED GATE: Error must have been flagged AND AI's position must be ACTUALLY WRONG.",
+      "boundary_notes": "DOUBLING DOWN TEST: AI must DEFEND or RESTATE incorrect position after challenge.",
+      "counts": [
+        "User says 'that's wrong' \u2014 AI responds 'no, I'm confident' (but is wrong)",
+        "Dismisses user's correct source"
+      ],
+      "does_not_count": [
+        "AI is actually correct and explains why",
+        "AI ignores correction (that's plow_through)"
+      ]
+    },
+    "intent_missed": {
+      "category": "outcome",
+      "valence": "negative",
+      "description": "Response addresses something other than what user was trying to accomplish.",
+      "structural_gate": "CLEAR INTENT GATE: User's intent must be reasonably clear.",
+      "boundary_notes": "WRONG QUESTION TEST: AI answered a DIFFERENT QUESTION. Not 'answered poorly' (that's under_delivered).",
+      "counts": [
+        "User asks 'why is code slow' \u2014 AI explains what code does",
+        "User asks for recommendation \u2014 AI just explains options without guidance"
+      ],
+      "does_not_count": [
+        "Genuinely ambiguous request",
+        "Right question, poor answer (under_delivered)"
+      ]
+    },
+    "user_empowered": {
+      "category": "outcome",
+      "valence": "positive",
+      "description": "Response leaves user positioned to make good decisions or take effective action.",
+      "structural_gate": "ACTIONABILITY GATE: Must contain actionable content the user can act on.",
+      "boundary_notes": "EMPOWERMENT TEST: User can now make informed decision, has clear next step, or understands WHY.",
+      "counts": [
+        "Clear tradeoff explanation enabling informed choice",
+        "Debugging guide with clear next steps"
+      ],
+      "does_not_count": [
+        "Technically correct but too complex to act on",
+        "Information without connection to user's situation"
+      ]
+    },
+    "user_misled": {
+      "category": "outcome",
+      "valence": "negative",
+      "description": "Response could lead the user to make a worse decision than they would have made without it.",
+      "structural_gate": "ACTIONABLE MISINFORMATION GATE: Response must contain information the user might ACT ON that would lead to a worse outcome.",
+      "boundary_notes": "HARM POTENTIAL TEST: Would following this advice leave the user WORSE OFF? The misinformation must be on something MATERIAL to the user's decision.",
+      "counts": [
+        "Wrong security advice that would leave system vulnerable",
+        "Incorrect dosage calculation in medical context"
+      ],
+      "does_not_count": [
+        "Minor inaccuracy with no practical impact",
+        "Incomplete advice that's still directionally correct"
+      ]
+    },
+    "conversation_advanced": {
+      "category": "outcome",
+      "valence": "positive",
+      "description": "The conversation made meaningful progress toward the user's goal in this turn.",
+      "structural_gate": "GOAL PRESENT GATE: User must have an identifiable goal or need. Casual/social conversations don't qualify.",
+      "boundary_notes": "PROGRESS TEST: Is the user closer to their goal after this turn? Must be meaningful progress, not just any response.",
+      "counts": [
+        "Working code provided for user's problem",
+        "Key insight that unblocks user's decision"
+      ],
+      "does_not_count": [
+        "Social pleasantries",
+        "Response that doesn't move toward goal"
+      ]
+    },
+    "conversation_stalled": {
+      "category": "outcome",
+      "valence": "negative",
+      "description": "The conversation failed to make progress despite an opportunity to do so.",
+      "structural_gate": "OPPORTUNITY GATE: There must have been an opportunity to advance the conversation that was missed.",
+      "boundary_notes": "STALL TEST: Despite having enough information to help, the AI produced a response that doesn't move the conversation forward.",
+      "counts": [
+        "AI asks for info user already provided",
+        "AI gives vague response when specific help was possible"
+      ],
+      "does_not_count": [
+        "AI legitimately needs more info",
+        "Complex problem where partial progress is reasonable"
+      ]
+    },
+    "factual_error": {
+      "category": "information_handling",
+      "valence": "negative",
+      "description": "AI provides verifiably incorrect information, regardless of the confidence level used to present it.",
+      "structural_gate": "FACTUAL CLAIM GATE: Must contain at least one factual claim that could be verified true/false against reliable sources. Pure opinions, subjective judgments, creative content, and code logic don't qualify.",
+      "boundary_notes": "FACTUAL ERROR vs FALSE CONFIDENCE: These two signals are independent. factual_error = the claim is wrong. false_confidence = the confidence level is miscalibrated. A wrong claim stated tentatively ('I think the capital might be X') is factual_error=1 but false_confidence=0. A wrong claim stated definitively triggers both. A correct claim stated overconfidently is false_confidence only.",
+      "counts": [
+        "Incorrect dates, statistics, or historical facts",
+        "Wrong API signatures or function parameters",
+        "Incorrect attribution of quotes or ideas",
+        "Factually wrong medical, legal, or scientific claims"
+      ],
+      "does_not_count": [
+        "Outdated but previously correct information (borderline \u2014 flag if the model doesn't note it may be outdated)",
+        "Debatable interpretations where experts disagree",
+        "Code bugs (wrong logic, not wrong facts)",
+        "Simplifications that are technically incomplete but not wrong"
+      ]
+    },
+    "generate_without_clarifying": {
+      "category": "responsiveness",
+      "valence": "negative",
+      "description": "The user's message contains an unresolved ambiguity, underspecification, or explicit request for guidance, AND the AI produces substantive content without asking a clarifying question, surfacing the ambiguity, or acknowledging multiple interpretations.",
+      "structural_gate": "AMBIGUITY PRESENCE GATE: The user's message must contain genuine ambiguity (multiple plausible interpretations a reasonable reader would notice) or be substantially underspecified for the task at hand. If the user's request is clear enough for a reasonable response, this signal does not apply.",
+      "boundary_notes": "TWO-CHECK TEST: (1) Is there something to clarify? The user's message must have genuine ambiguity, underspecification, or an explicit request for guidance. (2) Did the AI skip it? The AI produced substantive content without asking a clarifying question, stating its interpretation, or acknowledging that multiple interpretations exist. Both checks must be YES for this signal to fire. This captures the 'generate rather than clarify' dynamic \u2014 the AI chose to produce output rather than pause.",
+      "counts": [
+        "'Fix the database' \u2192 AI rewrites a specific schema without asking which database or what's wrong",
+        "'Make it faster' \u2192 AI optimizes the frontend without asking whether the issue is frontend or backend",
+        "User asks for 'a summary' of a 50-page doc \u2192 AI produces one without asking about length, audience, or focus"
+      ],
+      "does_not_count": [
+        "User's request is clear and well-specified \u2014 no ambiguity to surface",
+        "AI asks a clarifying question before or during its response",
+        "AI explicitly states its interpretation ('I'll assume you mean...')",
+        "AI presents multiple interpretations ('If you mean X... If you mean Y...')",
+        "Minor ambiguity that wouldn't materially change the response"
+      ],
+      "calibration_needed": true,
+      "calibration_note": "\u03ba=0.220 with extreme GPT-5 asymmetry (Opus 239, Sonnet 122, GPT-5 11). Needs targeted calibration."
+    },
+    "appropriate_confidence": {
+      "category": "information_handling",
+      "valence": "positive",
+      "description": "AI asserts confidently on something it has good reason to be confident about, in a context where confidence is notably helpful.",
+      "structural_gate": "NOTABLE CONFIDENCE GATE: Only fires when the question was complex/contested enough that hedging would be tempting. Routine factual answers don't qualify.",
+      "boundary_notes": "COMPLEXITY-PLUS-CONFIDENCE TEST: (1) Topic where hedging tempting + (2) clear decisive answer backed by reasoning.",
+      "counts": [
+        "Complex debugging \u2014 AI correctly identifies root cause clearly",
+        "Clear recommendation with reasoning on contested topic"
+      ],
+      "does_not_count": [
+        "Routine correct answers to simple questions",
+        "Confident but wrong (that's false_confidence)"
+      ],
+      "tier": 2,
+      "tier_note": "Not yet reliable for downstream analysis. Included for calibration improvement.",
+      "r3_kappa": -0.003
+    },
+    "intent_addressed": {
+      "category": "outcome",
+      "valence": "positive",
+      "description": "Response addresses the user's actual intent, not just literal text.",
+      "structural_gate": "INTENT GAP GATE: Must be a gap between literal request and underlying intent. If they're the same, just a correct answer.",
+      "boundary_notes": "INTENT INFERENCE TEST: Response demonstrates understanding of GOAL behind the question.",
+      "counts": [
+        "User asks 'what does error 403 mean' \u2014 AI explains AND identifies likely cause in their context"
+      ],
+      "does_not_count": [
+        "Clear question gets direct answer",
+        "AI guesses intent wrong (that's intent_missed)"
+      ],
+      "tier": 2,
+      "tier_note": "Not yet reliable for downstream analysis. Included for calibration improvement.",
+      "r3_kappa": 0.05
+    },
+    "over_delivered": {
+      "category": "scope",
+      "valence": "negative",
+      "description": "AI provides substantially more than requested \u2014 unrequested explanations, excessive context, additional topics.",
+      "structural_gate": "EXCESS CONTENT GATE: Content must go BEYOND what was requested.",
+      "boundary_notes": "UNWANTED SURPLUS TEST: Extra content must be UNHELPFUL or BURDENSOME. Useful anticipatory info is NOT over-delivery.",
+      "counts": [
+        "User asks 'how to exit vim' \u2014 gets 500-word essay on vim philosophy",
+        "Yes/no question gets 5 paragraphs of background"
+      ],
+      "does_not_count": [
+        "User asked for thorough explanation",
+        "Brief relevant note user will need"
+      ],
+      "tier": 2,
+      "tier_note": "Not yet reliable for downstream analysis. Included for calibration improvement.",
+      "r3_kappa": 0.222
+    },
+    "problem_ignored": {
+      "category": "problem_handling",
+      "valence": "negative",
+      "description": "A visible problem exists and the AI proceeds without noting it.",
+      "structural_gate": "VISIBLE PROBLEM GATE: Problem must be detectable by a competent generalist.",
+      "boundary_notes": "COMPETENT ASSISTANT TEST: Would a competent human assistant have noticed? If AI mentions it even briefly, signal does not fire.",
+      "counts": [
+        "Obvious null pointer bug in user's code \u2014 AI doesn't mention it",
+        "User states factually wrong premise \u2014 AI builds on it"
+      ],
+      "does_not_count": [
+        "No visible problem",
+        "Problem requires specialized expertise",
+        "AI mentions it even briefly"
+      ],
+      "tier": 2,
+      "tier_note": "Not yet reliable for downstream analysis. Included for calibration improvement.",
+      "r3_kappa": 0.193
+    },
+    "problem_surfaced": {
+      "category": "problem_handling",
+      "valence": "positive",
+      "description": "AI proactively raises an issue the user hasn't mentioned.",
+      "structural_gate": "PROACTIVE IDENTIFICATION GATE: Problem must be something USER DID NOT ASK ABOUT.",
+      "boundary_notes": "SUBSTANTIVE PROBLEM TEST: Must be SPECIFIC and ACTIONABLE. Generic caveats don't qualify.",
+      "counts": [
+        "Flags race condition in user's SQL",
+        "Notes XSS vulnerability in user's code"
+      ],
+      "does_not_count": [
+        "User asked about problems",
+        "'Always back up your data'",
+        "'Consider consulting a professional'"
+      ],
+      "tier": 2,
+      "tier_note": "Not yet reliable for downstream analysis. Included for calibration improvement.",
+      "r3_kappa": 0.153
+    },
+    "scope_matched": {
+      "category": "scope",
+      "valence": "positive",
+      "description": "Response addresses what was asked at the right level of detail and breadth.",
+      "structural_gate": "SCOPE CHALLENGE GATE: Only tag when request COULD EASILY have been over/under-addressed. Simple Q&A not notable.",
+      "boundary_notes": "GOLDILOCKS TEST: Breadth, depth, and format all approximately right.",
+      "counts": [
+        "Complex question gets proportional multi-part answer",
+        "Code review addresses significant issues without nitpicking"
+      ],
+      "does_not_count": [
+        "Simple question gets simple answer",
+        "Response merely close but slightly verbose"
+      ],
+      "tier": 2,
+      "tier_note": "Not yet reliable for downstream analysis. Included for calibration improvement.",
+      "r3_kappa": 0.204
+    }
+  },
+  "layer3_signals": {
+    "user_asks_clarification": {
+      "category": "user_behavior",
+      "valence": "neutral",
+      "description": "User asks the AI to clarify, explain, or re-explain something from a prior AI response. Indicates the prior response was unclear or insufficient.",
+      "structural_gate": "MULTI-TURN GATE: Must be multi-turn with a prior AI response to seek clarification about.",
+      "boundary_notes": "CLARIFICATION REQUEST TEST: User's message must contain a question or request directed at understanding something the AI previously said. Look for: 'what do you mean by...', 'can you explain...', 'I don't understand...', 'could you clarify...', rephrased question after AI's answer. Does NOT count: asking a NEW question on a new topic, providing additional context for the AI.",
+      "counts": [
+        "'What do you mean by X?'",
+        "'Can you explain that more simply?'",
+        "'I don't understand the second step'",
+        "Rephrasing original question after AI's answer didn't help"
+      ],
+      "does_not_count": [
+        "New question on new topic",
+        "Providing additional context",
+        "Follow-up question that extends (not clarifies) the discussion"
+      ]
+    },
+    "user_corrects_ai": {
+      "category": "user_behavior",
+      "valence": "negative",
+      "description": "User explicitly tells the AI it was wrong about something, provides the correct information, or points out an error in the AI's response.",
+      "structural_gate": "MULTI-TURN GATE: Must be multi-turn with a prior AI response containing something to correct.",
+      "boundary_notes": "EXPLICIT CORRECTION TEST: User must state or strongly imply that the AI's prior response contained an error. Look for: 'that's wrong', 'actually, it's...', 'no, I meant...', 'the correct answer is...', direct contradiction of AI's claim with the right information. Does NOT include: user adding new information (not a correction), user changing their mind/requirements, user rephrasing their request.",
+      "counts": [
+        "'That's wrong, the answer is Y not X'",
+        "'Actually, I'm using Python 2, not 3'",
+        "'No, the function should return a list, not a dict'",
+        "'The error is on line 5, not line 10'"
+      ],
+      "does_not_count": [
+        "User provides new info AI didn't have",
+        "User changes requirements",
+        "User rephrases original request"
+      ]
+    },
+    "user_implicit_correction": {
+      "category": "user_behavior",
+      "valence": "negative",
+      "description": "User doesn't explicitly say the AI was wrong but rephrases, redirects, or re-specifies in a way that implies the AI's response missed the mark.",
+      "structural_gate": "MULTI-TURN GATE: Must be multi-turn with a prior AI response.",
+      "boundary_notes": "REDIRECT TEST: User's message implicitly signals the AI's response didn't hit the target WITHOUT explicitly calling it wrong. Patterns: repeating the original question with emphasis, adding constraints that were implied but missed, redirecting to the actual topic after AI went off-track, re-specifying what they actually want. Distinguish from: user legitimately adding new requirements (scope_change), user asking a follow-up question (not a correction).",
+      "counts": [
+        "Repeats original question with emphasis after AI answered differently",
+        "'I meant the FRONTEND, not the backend'",
+        "'Let me rephrase: I need X specifically'",
+        "Re-specifying constraints AI ignored: 'it needs to work on Python 2'"
+      ],
+      "does_not_count": [
+        "User adding genuinely new requirements",
+        "Follow-up question extending the topic",
+        "User providing more context they forgot initially"
+      ]
+    },
+    "user_expresses_frustration": {
+      "category": "user_behavior",
+      "valence": "negative",
+      "description": "User expresses frustration, anger, or strong negative emotion about the AI's response or the interaction.",
+      "structural_gate": "No gate \u2014 can fire on any turn.",
+      "boundary_notes": "FRUSTRATION MARKER TEST: Look for explicit markers: profanity, exclamation marks with negative content, 'this is ridiculous', 'you're not helping', 'I've asked three times', 'stop doing X', caps for emphasis on negative words. Must be directed at the AI or the interaction, not describing frustration about an external situation.",
+      "counts": [
+        "'This is not what I asked for!'",
+        "'You keep giving me the wrong answer'",
+        "'I've already told you three times...'",
+        "Profanity directed at the AI's response",
+        "'STOP giving me X, I want Y'"
+      ],
+      "does_not_count": [
+        "User describing frustration with external situation ('my code is so frustrating')",
+        "Mild disappointment ('hmm, that's not quite right')",
+        "Neutral correction without emotional markers"
+      ]
+    },
+    "user_expresses_dissatisfaction": {
+      "category": "user_behavior",
+      "valence": "negative",
+      "description": "User expresses dissatisfaction or disappointment with the AI's response without strong frustration. Milder than frustration.",
+      "structural_gate": "MULTI-TURN GATE: Must be multi-turn (need a prior AI response to be dissatisfied with).",
+      "boundary_notes": "DISSATISFACTION MARKER TEST: Look for: 'that's not what I needed', 'this doesn't help', 'I was hoping for...', 'not quite', 'that's not right', negative evaluation of the response quality. Milder than frustration \u2014 no profanity, no exclamation-heavy anger. Explicit dissatisfaction is stated directly. Implicit dissatisfaction is shown through behavior (giving up, switching to a different approach, passive acceptance with resignation markers like 'fine, I guess', 'whatever, I'll do it myself').",
+      "counts": [
+        "'That's not quite what I was looking for'",
+        "'This doesn't really help'",
+        "'I was hoping for something more specific'",
+        "'Not what I needed'",
+        "'Fine, I'll figure it out myself' (implicit, with resignation)"
+      ],
+      "does_not_count": [
+        "Neutral correction without negative evaluation",
+        "Asking for more detail (that's clarification)",
+        "Strong frustration with profanity/anger (that's frustration)"
+      ]
+    },
+    "user_validation_seeking": {
+      "category": "user_behavior",
+      "valence": "neutral",
+      "description": "User asks the AI to validate, confirm, or approve their own idea, approach, or understanding.",
+      "structural_gate": "No gate \u2014 can fire on any turn.",
+      "boundary_notes": "APPROVAL-SEEKING TEST: User presents their own idea/approach and asks if it's correct or good. Look for: 'is this right?', 'does this make sense?', 'would this approach work?', 'am I on the right track?', 'what do you think of my plan?'. Must be seeking validation of THEIR OWN idea, not asking the AI to generate something new.",
+      "counts": [
+        "'Is my understanding correct that X?'",
+        "'Would this approach work?'",
+        "'Am I on the right track with this implementation?'",
+        "'Does this make sense?'"
+      ],
+      "does_not_count": [
+        "Asking AI to generate something new",
+        "Asking AI to explain something",
+        "Asking a factual question"
+      ]
+    },
+    "user_ambiguous_request": {
+      "category": "user_behavior",
+      "valence": "neutral",
+      "description": "The user's message contains genuine ambiguity \u2014 multiple plausible interpretations a reasonable reader could identify.",
+      "structural_gate": "No gate \u2014 can fire on any turn including the first.",
+      "boundary_notes": "AMBIGUITY PRESENCE TEST: The user's message must have 2+ plausible interpretations. Types: (1) LEXICAL: a word/phrase has multiple meanings in context. (2) REFERENTIAL: unclear what 'it', 'that', 'the problem' refers to. (3) SCOPE: unclear how much the user wants (a quick answer vs comprehensive guide). (4) INTENT: could be asking for information vs asking for action. Must be genuine ambiguity a reasonable reader would notice, not theoretical edge cases.",
+      "counts": [
+        "'Fix the database' (which one? what's wrong?)",
+        "'Make it faster' (frontend? backend? both?)",
+        "'Help me with Python' (too broad to know what's needed)",
+        "'Can you update this?' (update what aspect?)"
+      ],
+      "does_not_count": [
+        "Clear, well-specified request",
+        "Minor ambiguity that doesn't affect the response",
+        "Technical jargon that's standard in context"
+      ]
+    },
+    "user_positive_feedback": {
+      "category": "user_behavior",
+      "valence": "positive",
+      "description": "User explicitly signals the AI's response was helpful, correct, or satisfying. Provides genuine positive evaluation, not just acknowledgment.",
+      "structural_gate": "MULTI-TURN GATE: Must be multi-turn with a prior AI response to evaluate.",
+      "boundary_notes": "GENUINE SATISFACTION TEST: User's message must contain explicit positive evaluation of the AI's response. Look for: 'perfect', 'that's exactly what I needed', 'this works great', 'thanks, that solved it', 'excellent explanation', enthusiastic follow-up building on the answer. Must express genuine satisfaction, not mere acknowledgment. Key distinction from passive_acceptance: positive_feedback has explicit evaluative language ('great', 'perfect', 'exactly right', 'this helped') while passive acceptance is minimal ('ok', 'thanks', 'got it') without evaluative content.",
+      "counts": [
+        "'Perfect, that's exactly what I needed!'",
+        "'This works great, thanks!'",
+        "'Excellent, that solved my problem'",
+        "'Great explanation, now I understand'",
+        "Enthusiastic follow-up that builds directly on the answer"
+      ],
+      "does_not_count": [
+        "'Ok' or 'thanks' without evaluative content (that's passive_acceptance territory)",
+        "'Got it' + moves on (mere acknowledgment)",
+        "Politeness markers without genuine evaluation ('thanks for trying')",
+        "Positive framing of a correction ('good start, but actually...')"
+      ]
+    },
+    "user_multi_request": {
+      "category": "user_behavior",
+      "valence": "neutral",
+      "description": "User asks for two or more distinct things in a single message \u2014 a compound request where each part could stand alone as a separate ask.",
+      "structural_gate": "No gate \u2014 can fire on any turn including the first.",
+      "boundary_notes": "COMPOUND REQUEST TEST: The user's message contains 2+ independently fulfillable requests. Types: (1) EXPLICIT LIST: 'Can you do X and also Y?', numbered items, bullet points. (2) STACKED ASKS: 'Fix the bug. Also, add tests for it.' (3) QUESTION CHAIN: 'What is X? And how does it compare to Y?' Each sub-request must be independently answerable \u2014 a single request with multiple constraints ('make it fast AND secure') does NOT count. This signal is important because partial fulfillment of compound requests is a major source of invisible failures.",
+      "counts": [
+        "'Fix the login bug and add unit tests for the auth module'",
+        "'What's the difference between X and Y? Also, which one should I use for Z?'",
+        "'1) Update the config 2) Deploy to staging 3) Run the smoke tests'",
+        "'Explain how async works and give me an example in Python'"
+      ],
+      "does_not_count": [
+        "Single request with multiple constraints ('make it fast and secure')",
+        "Request with clarifying detail ('fix the bug \u2014 it happens on login')",
+        "Follow-up that extends a single thread",
+        "Request + greeting ('Hi! Can you help me with X?')"
+      ]
+    },
+    "user_abandons_thread": {
+      "category": "user_behavior",
+      "valence": "negative",
+      "description": "User silently drops a line of inquiry and moves to a different topic without resolution. The original thread was not answered satisfactorily but the user doesn't push back \u2014 they just move on.",
+      "structural_gate": "MULTI-TURN GATE: Must be multi-turn with at least one prior exchange on the abandoned topic.",
+      "boundary_notes": "SILENT DROP TEST: Three conditions must be met: (1) User had an active line of inquiry (asked about X). (2) AI's response did not clearly resolve X (no positive_feedback, no clear resolution marker). (3) User's next message is about a DIFFERENT topic Y without closing X. Key distinctions: if the user explicitly says 'never mind' or 'let's move on', that's explicit, not silent \u2014 still tag it. If the user says 'thanks' and moves on with evident satisfaction, that's topic completion, not abandonment. If user changes scope within the same problem (scope_change), that's not abandonment.",
+      "counts": [
+        "User asked about deployment, AI gave confusing answer, user asks about something else entirely",
+        "User was debugging error X, AI suggested wrong fix, user says 'anyway, can you help with Y?'",
+        "'Never mind, let's talk about Z instead' after unresolved X",
+        "User asked two questions, AI answered one, user only follows up on the answered one"
+      ],
+      "does_not_count": [
+        "User satisfied with answer, moves to next topic (natural topic completion)",
+        "User narrows or pivots within same problem (that's scope_change)",
+        "User provides additional context on same topic",
+        "Conversation naturally concluding"
+      ]
+    },
+    "user_repeats_request": {
+      "category": "user_behavior",
+      "valence": "negative",
+      "description": "User says essentially the same thing they said in a prior turn \u2014 verbatim or near-verbatim repetition of their original request, possibly with minor emphasis changes.",
+      "structural_gate": "MULTI-TURN GATE: Must be multi-turn with a prior user message containing the original request.",
+      "boundary_notes": "REPETITION TEST: The user's current message substantially overlaps with a prior user message. The request is the SAME, not a refinement. Key distinction from implicit_correction: repetition = same request again (AI apparently didn't process it); implicit_correction = reframed/redirected request (AI processed it but got it wrong). Look for: same keywords and intent, possibly with added emphasis ('I SAID...', 'again,...', 'like I asked before'). If the user adds significant new constraints or reframes the ask, that's implicit_correction or scope_change, not repetition.",
+      "counts": [
+        "Repeating the same question verbatim after AI went off-topic",
+        "'Like I said, I need X' \u2014 restating original request",
+        "Same request with added emphasis: 'I'm asking about X, not Y'",
+        "'Again: how do I do X?' after AI answered a different question"
+      ],
+      "does_not_count": [
+        "Reframing with new constraints (that's implicit_correction)",
+        "Extending the request with new requirements (that's scope_change)",
+        "Asking a related but different question",
+        "Echoing AI's response back for confirmation"
+      ]
+    },
+    "ai_self_contradiction": {
+      "category": "ai_behavior",
+      "valence": "negative",
+      "description": "AI makes a claim in this response that directly contradicts a claim it made in a prior response within the same conversation, without acknowledging the change.",
+      "structural_gate": "MULTI-TURN GATE: Must be multi-turn with a prior AI response containing a claim.",
+      "boundary_notes": "CONTRADICTION TEST: Two conditions: (1) A specific claim in this response directly contradicts a specific claim from a prior AI response. (2) The AI does NOT acknowledge the change ('I was wrong earlier', 'on reflection', 'actually'). If the AI acknowledges the change, it's error_recovery, not self_contradiction. Must be about the SAME topic \u2014 AI giving different advice on different sub-topics is not contradiction.",
+      "counts": [
+        "'Use method X' in turn 2, then 'never use method X, use Y instead' in turn 4 without acknowledgment",
+        "'This is safe to use' then later 'this has known security issues' on the same thing"
+      ],
+      "does_not_count": [
+        "AI changes recommendation and acknowledges it",
+        "Different advice on different sub-topics",
+        "Nuancing or adding caveats to prior advice"
+      ]
+    },
+    "ai_implicit_refusal": {
+      "category": "ai_behavior",
+      "valence": "negative",
+      "description": "AI silently ignores or skips part of the user's request without acknowledging it declined to address that part.",
+      "structural_gate": "MULTI-PART REQUEST GATE: User's message must contain identifiable distinct parts or the AI's response must visibly omit something the user asked for.",
+      "boundary_notes": "SILENT SKIP TEST: The AI addressed some parts of the request but silently omitted others. Different from under_delivered (too little detail on what was addressed) \u2014 this is about SKIPPING entire parts. Look for: multi-part questions with only some parts answered, specific requests with parts ignored, constraints not addressed.",
+      "counts": [
+        "User asks 3 questions, AI answers 2 and ignores the third",
+        "User asks for code 'with error handling and logging' \u2014 AI provides code with neither",
+        "User asks to 'explain X and provide an example' \u2014 AI explains but gives no example"
+      ],
+      "does_not_count": [
+        "AI addresses all parts but some superficially (that's under_delivered)",
+        "User's request only had one part",
+        "AI explicitly says 'I can't address X'"
+      ]
+    },
+    "ai_malfunction": {
+      "category": "ai_behavior",
+      "valence": "negative",
+      "description": "AI response shows signs of a technical malfunction \u2014 truncated mid-sentence, garbled output, repeated characters/phrases in a loop, code in wrong language, or clearly broken formatting.",
+      "structural_gate": "No gate \u2014 purely mechanical detection.",
+      "boundary_notes": "MECHANICAL DEFECT TEST: The response has a structural defect that isn't a judgment call. Patterns: (1) TRUNCATION: response ends mid-sentence or mid-code-block. (2) LOOP: same phrase or paragraph repeated 3+ times. (3) GARBLED: nonsensical character sequences. (4) WRONG LANGUAGE: code in a language the user didn't ask for. (5) BROKEN FORMAT: markdown/code blocks that are clearly malformed. Must be a MECHANICAL issue, not a quality judgment.",
+      "counts": [
+        "Response ends mid-sentence",
+        "Same paragraph repeated 3+ times",
+        "Garbled character sequences",
+        "User asked for Python, got Java with no explanation"
+      ],
+      "does_not_count": [
+        "Poor quality response (that's a judgment call)",
+        "Response that's wrong but well-formed",
+        "Short response (might be appropriate)"
+      ]
+    },
+    "ethical_tension": {
+      "category": "conversation_dynamics",
+      "valence": "neutral",
+      "description": "The conversation involves a request or topic where ethical considerations create tension \u2014 the user wants something the AI may need to refuse, qualify, or handle delicately.",
+      "structural_gate": "No gate \u2014 can fire on any turn.",
+      "boundary_notes": "ETHICAL DIMENSION TEST: The request or topic touches on: (1) potential harm (to the user or others), (2) legality, (3) privacy concerns, (4) content policy boundaries, (5) professional ethics (medical/legal/financial advice without qualifications). Must be a genuine ethical dimension, not just any request the AI adds disclaimers to. Look for: AI explicitly declining or qualifying for ethical reasons, requests that test content policy, advice scenarios where harm is possible.",
+      "counts": [
+        "User asks for help with something potentially harmful",
+        "Medical/legal/financial advice where wrong guidance could cause harm",
+        "Request that pushes content policy boundaries"
+      ],
+      "does_not_count": [
+        "AI adds generic disclaimers to benign requests",
+        "Technical question with no ethical dimension",
+        "User asks about ethics as a topic of discussion"
+      ]
+    },
+    "user_provides_invalid_input": {
+      "category": "user_behavior",
+      "valence": "neutral",
+      "description": "The user's input is garbled, empty, in an unexpected language, pasted error text without context, or otherwise not a coherent request.",
+      "structural_gate": "No gate \u2014 can fire on any turn.",
+      "boundary_notes": "COHERENCE TEST: The user's message fails basic coherence as a request. Patterns: empty message, random characters, pasted stack trace without any question, message in a different language than the conversation, accidental copy-paste of unrelated content. Does NOT include: poorly worded but understandable requests, requests with typos, technical questions that are just hard to understand.",
+      "counts": [
+        "Empty message",
+        "Random characters or garbled text",
+        "Pasted stack trace with no question or context",
+        "Accidental paste of unrelated content"
+      ],
+      "does_not_count": [
+        "Poorly worded but understandable request",
+        "Request with typos",
+        "Complex technical question"
+      ],
+      "tier": 2,
+      "tier_note": "Not yet reliable for downstream analysis. Included for calibration improvement.",
+      "r3_kappa": 0.373
+    },
+    "user_scope_change": {
+      "category": "user_behavior",
+      "valence": "neutral",
+      "description": "User changes, expands, or narrows the scope of their request compared to what they originally asked.",
+      "structural_gate": "MULTI-TURN GATE: Must be multi-turn with an original request to compare against.",
+      "boundary_notes": "SCOPE SHIFT TEST: The user's current request differs in scope from their original ask. Forms: (1) EXPANSION: 'now also add X', 'can we extend this to cover Y too?', adding new requirements. (2) NARROWING: 'actually, just focus on X', 'let's simplify to only Y'. (3) PIVOT: 'actually, forget that, I need Z instead'. Distinguish from correction (AI was wrong) vs scope change (user wants something different).",
+      "counts": [
+        "'Can you also add authentication?'",
+        "'Actually, let's simplify \u2014 just the basic version'",
+        "'Forget the backend, I just need the frontend'",
+        "'Now extend it to handle edge case X'"
+      ],
+      "does_not_count": [
+        "User correcting AI's error (that's correction)",
+        "User providing clarification AI asked for",
+        "Follow-up question on same scope"
+      ],
+      "tier": 2,
+      "tier_note": "Not yet reliable for downstream analysis. Included for calibration improvement.",
+      "r3_kappa": 0.299
+    }
+  },
+  "derived_classifications": {
+    "description": "These are NOT directly tagged. They are computed from per-turn signal patterns across the full transcript.",
+    "goal_failure": {
+      "description": "The user's primary goal was not achieved by the end of the conversation.",
+      "derivation_rule": "ANY of: (1) intent_missed fires on the LAST AI turn, (2) under_delivered fires on majority of AI turns, (3) user_expresses_frustration or user_expresses_dissatisfaction fires AND no subsequent conversation_advanced, (4) user_corrects_ai fires 2+ times without subsequent error_recovery, (5) false_confidence fires on a claim central to the user's request.",
+      "confidence": "Derived \u2014 agreement is deterministic given per-turn tags."
+    },
+    "task_success": {
+      "description": "The user's primary goal was achieved.",
+      "derivation_rule": "ALL of: (1) conversation_advanced fires on the LAST AI turn, (2) intent_addressed fires at least once, (3) NO goal_failure conditions are true, (4) NO user_expresses_frustration or unresolved user_corrects_ai.",
+      "confidence": "Derived."
+    },
+    "partial_success": {
+      "description": "Some progress was made but the full goal was not achieved.",
+      "derivation_rule": "conversation_advanced fires on at least one turn BUT goal_failure conditions also present. Or: intent_addressed fires early but later turns show under_delivered or user_expresses_dissatisfaction.",
+      "confidence": "Derived."
+    },
+    "recovery": {
+      "description": "A failure occurred but was corrected during the conversation.",
+      "derivation_rule": "error_recovery fires AFTER a turn where false_confidence, intent_missed, or user_corrects_ai fired. The conversation_advanced fires on a subsequent turn.",
+      "confidence": "Derived."
+    },
+    "user_abandonment": {
+      "description": "User stops engaging with the conversation before their goal is achieved.",
+      "derivation_rule": "The conversation ends (no more user turns) while goal_failure conditions are present OR the last user turn shows minimal engagement (single-word acknowledgment, no follow-up) after a turn with negative AI signals.",
+      "confidence": "Derived."
+    },
+    "visible_failure": {
+      "description": "A failure that the user explicitly reacted to.",
+      "derivation_rule": "goal_failure is true AND any of these user signals fired: user_corrects_ai, user_expresses_frustration, user_expresses_dissatisfaction, user_asks_clarification (repeated), user_scope_change (as correction).",
+      "confidence": "Derived."
+    },
+    "invisible_failure": {
+      "description": "A failure that the user did NOT explicitly react to.",
+      "derivation_rule": "goal_failure is true AND visible_failure is NOT true. The AI made errors (false_confidence, intent_missed, problem_ignored) but the user did not push back.",
+      "confidence": "Derived."
+    }
+  },
+  "archetypes": {
+    "description": "Failure archetypes derived from per-turn signal patterns. Only assigned when goal_failure is true and visible_failure is false (invisible failures).",
+    "rules": {
+      "The confidence trap": "false_confidence fires on 1+ turns",
+      "The silent mismatch": "intent_missed OR silent_assumption OR factual_error fires (AI misunderstood, made a factual error, or silently skipped something \u2014 user didn't catch it)",
+      "The drift": "off_topic_drift fires on 1+ turns",
+      "The death spiral": "repetition fires on 1+ turns (AI stuck in a loop)",
+      "The contradiction unravel": "ai_self_contradiction fires (AI contradicts itself, confusing the user)",
+      "The walkaway": "user_abandonment is true (user gives up)",
+      "The mystery failure": "goal_failure is true but no specific AI failure signals fired (the failure has no obvious cause)",
+      "The partial recovery": "recovery is true (failure happened but was partially addressed)"
+    }
+  },
+  "calibration_guidelines": [
+    "Tag only what is OBSERVABLE in the text. Do not infer intent or hidden meaning.",
+    "When in doubt, do NOT tag. False negatives are better than false positives for agreement.",
+    "Check structural gates FIRST. If the gate fails, the signal CANNOT fire regardless of other evidence.",
+    "Layer 1 signals should require no judgment \u2014 purely structural/textual features.",
+    "Layer 2 signals require judgment but are GATED by structural prerequisites.",
+    "Layer 3 user signals should be tagged based on the USER's turn, not the AI's.",
+    "A single turn can have multiple signals from all three layers.",
+    "For multi-turn conversations, consider the full context but tag the CURRENT turn."
+  ],
+  "output_format": {
+    "per_turn": {
+      "turn_number": "integer, 1-indexed",
+      "ai_response_signals": [
+        "list of signal names from layer1 + layer2 that apply to this AI response"
+      ],
+      "user_turn_signals": [
+        "list of signal names from layer3 that apply to the preceding user message"
+      ],
+      "evidence": {
+        "signal_name": "brief evidence quote or description"
+      }
+    }
+  },
+  "transcript_level_signals": {
+    "description": "Signals that require looking at the full conversation arc. Cannot be judged from any single turn. Tagged in Pass 3 (one call per transcript).",
+    "user_abandonment": {
+      "valence": "negative",
+      "description": "User stops the conversation without achieving their goal \u2014 inferred from the conversation ending without resolution.",
+      "boundary_notes": "ABANDONMENT vs COMPLETION: The conversation must end without the user's primary goal being met. A user who gets their answer and stops is NOT abandoning. A user who says 'thanks' and leaves after an unhelpful response IS abandoning (polite exit \u2260 satisfaction). Key indicators: conversation ends mid-task, final user message is short/disengaged, no explicit confirmation of goal completion.",
+      "counts": [
+        "Conversation ends mid-task with no resolution",
+        "User's last message is a terse acknowledgment after unhelpful response",
+        "User stops responding after AI asks a clarifying question (implicit dropout)"
+      ],
+      "does_not_count": [
+        "User gets answer and naturally ends conversation",
+        "User explicitly says 'that's what I needed'",
+        "Short conversation where the question was simple and answered"
+      ]
+    },
+    "goal_achieved": {
+      "valence": "positive",
+      "description": "By the end of the conversation, the user's primary goal appears to have been met.",
+      "boundary_notes": "GOAL ACHIEVEMENT requires inferring the user's primary goal from their initial request(s) and assessing whether the conversation arc addressed it. Partial achievement where the core need was met counts. If the user's goal shifted during the conversation, assess against the final goal.",
+      "counts": [
+        "User's question was answered completely",
+        "User confirms satisfaction ('perfect, thanks!')",
+        "Task was completed (code written, plan created, etc.)"
+      ],
+      "does_not_count": [
+        "AI provided a response but it was incorrect/incomplete",
+        "User politely acknowledged without genuine satisfaction",
+        "Only a sub-goal was addressed while the main goal was missed"
+      ]
+    }
+  },
+  "changelog": {
+    "base": "unified_v1.1 (65 signals)",
+    "v2.0_changes": {
+      "removed_low_kappa": [
+        "ai_asked_probing_question",
+        "ai_asks_for_feedback",
+        "ai_normalizes_difficulty",
+        "ai_offers_to_elaborate",
+        "ai_provides_alternatives",
+        "ai_references_user_words",
+        "ai_stated_interpretation",
+        "ai_summarizes",
+        "appropriate_confidence",
+        "intent_addressed",
+        "over_delivered",
+        "problem_ignored",
+        "problem_surfaced",
+        "scope_matched",
+        "user_provides_invalid_input",
+        "user_scope_change"
+      ],
+      "added": [
+        "generate_without_clarifying"
+      ],
+      "renamed": {
+        "user_passive_acceptance": "user_acceptance"
+      }
+    },
+    "v2.1_changes": {
+      "removed": [
+        "user_acceptance (\u03ba=-0.002)"
+      ],
+      "reverted": [
+        "plow_through (reframe worsened \u03ba, reverted to v1.1 definition)"
+      ]
+    },
+    "v3.0_changes": {
+      "added_back_as_tier2": [
+        "ai_asked_probing_question",
+        "ai_asks_for_feedback",
+        "ai_normalizes_difficulty",
+        "ai_offers_to_elaborate",
+        "ai_provides_alternatives",
+        "ai_references_user_words",
+        "ai_stated_interpretation",
+        "ai_summarizes",
+        "appropriate_confidence",
+        "intent_addressed",
+        "over_delivered",
+        "problem_ignored",
+        "problem_surfaced",
+        "scope_matched",
+        "user_provides_invalid_input",
+        "user_scope_change"
+      ],
+      "dropped_permanently": [
+        "user_passive_acceptance (renamed user_acceptance in v2.0, dropped in v2.1)"
+      ],
+      "calibration_flagged": [
+        "generate_without_clarifying (\u03ba=0.220, extreme GPT-5 asymmetry)"
+      ],
+      "note": "All 16 cut signals restored with tier=2 flag for calibration. Tier 1 signals (no tier flag) are downstream-ready."
+    }
+  }
+}
